@@ -1,0 +1,3 @@
+import { DemoPage } from "../../components/demo-page";
+
+export default function ReconciliationPage() { return <DemoPage eyebrow="PAYMENT RECONCILIATION" title="Check a payment update." description="Use this page if your payment was completed but you have not yet received a registration number."><div className="demo-form"><label htmlFor="transaction">Payment transaction reference</label><input id="transaction" placeholder="Enter payment reference number" /><label htmlFor="reconcile-email">Email address</label><input id="reconcile-email" type="email" placeholder="you@example.com" /><button className="primary" type="button">Check payment <span>→</span></button></div></DemoPage>; }

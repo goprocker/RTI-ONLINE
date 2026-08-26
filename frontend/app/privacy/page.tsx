@@ -1,0 +1,2 @@
+import { PortalPage } from "../../components/portal-shell";
+export default function PrivacyPage() { return <PortalPage><main className="content-page wrap"><p className="eyebrow"><span className="eyebrow-line" />PRIVACY</p><h1>Your information,<br /><em>handled carefully.</em></h1><p className="page-lead">This is a frontend-only prototype. It does not transmit, process, or store citizen data.</p></main></PortalPage>; }

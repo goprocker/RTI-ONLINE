@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { PortalPage } from "../../components/portal-shell";
+
+export default function HelpPage() {
+  return <PortalPage><main className="content-page wrap"><div className="bread"><Link href="/">Home</Link><span>›</span><span>Help centre</span></div><div className="content-grid"><article><p className="eyebrow"><span className="eyebrow-line" />HELP CENTRE</p><h1>Answers when<br /><em>you need them.</em></h1><p className="page-lead">Find practical guidance before filing a request or first appeal.</p><div className="help-links"><Link href="/request/guidelines"><span>01</span><div><b>Filing an RTI request</b><p>Eligibility, fees, documents, and guidance.</p></div><i>→</i></Link><Link href="/status"><span>02</span><div><b>Tracking a request</b><p>Use your registration number to view updates.</p></div><i>→</i></Link><Link href="/authorities"><span>03</span><div><b>Finding an authority</b><p>Choose the right Central Government authority.</p></div><i>→</i></Link></div></article><aside className="side-help"><p>HELP DESK</p><h2>Need to speak to someone?</h2><p>011-24010690 / 691<br />Mon–Fri, 9:00 AM–5:30 PM</p><Link href="/contact">Contact support →</Link></aside></div></main></PortalPage>;
+}

@@ -1,0 +1,2 @@
+import { PortalPage } from "../../components/portal-shell";
+export default function ContactPage() { return <PortalPage><main className="content-page wrap"><p className="eyebrow"><span className="eyebrow-line" />CONTACT SUPPORT</p><h1>We’re here to help.</h1><p className="page-lead">For portal queries and feedback, contact the RTI Online help desk during office hours.</p><div className="contact-card"><b>Help desk</b><p>011-24010690 / 691</p><b>Office hours</b><p>Monday–Friday, 9:00 AM–5:30 PM, except public holidays</p></div></main></PortalPage>; }

@@ -1,0 +1,3 @@
+import { DemoPage } from "../../components/demo-page";
+
+export default function LoginPage() { return <DemoPage eyebrow="CITIZEN LOGIN" title="Welcome back." description="Sign in to access saved drafts, filed requests, appeals, and notifications."><div className="demo-form"><label htmlFor="login-email">Email or mobile number</label><input id="login-email" placeholder="Enter your email or mobile number" /><label htmlFor="login-password">Password</label><input id="login-password" type="password" placeholder="Enter your password" /><button className="primary" type="button">Sign in <span>→</span></button><a href="#">Forgot password?</a></div></DemoPage>; }

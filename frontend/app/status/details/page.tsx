@@ -1,0 +1,3 @@
+import { DemoPage } from "../../../components/demo-page";
+
+export default function StatusDetailsPage() { return <DemoPage eyebrow="REQUEST STATUS" title="Your request timeline." description="This demo illustrates the status timeline that will be populated by the backend."><div className="timeline"><article><span>✓</span><div><b>Request submitted</b><p>17 August 2026 · Registration number generated</p></div></article><article><span>2</span><div><b>Assigned to public authority</b><p>18 August 2026 · Awaiting CPIO action</p></div></article><article><span>3</span><div><b>Response due</b><p>16 September 2026</p></div></article></div></DemoPage>; }

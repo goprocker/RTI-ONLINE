@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+
+# local build caches
+*.tsbuildinfo
+
+# environment files
+.env*
+!.env.example
+
+# OS/editor files
+.DS_Store
+Thumbs.db
