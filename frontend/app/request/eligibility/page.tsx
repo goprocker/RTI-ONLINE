@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { PortalPage } from "../../../components/portal-shell";
-import { stateRtiPortalsDatabase } from "../../../lib/state-portals";
+import {
+  allStatesAndUTs,
+  statesRequiringOfflineFiling,
+  statesWithOnlinePortals
+} from "../../../lib/state-portals";
 
 function EligibilityCheckerContent() {
   const router = useRouter();
@@ -37,7 +41,7 @@ function EligibilityCheckerContent() {
     router.push(`/request/new${issueQuery ? `?query=${encodeURIComponent(issueQuery)}` : ""}`);
   }
 
-  const matchedState = stateRtiPortalsDatabase.find((s) => s.stateName === selectedState);
+  const matchedState = allStatesAndUTs.find((s) => s.stateName === selectedState);
 
   return (
     <main className="wrap" style={{ padding: "40px 20px 80px" }}>
@@ -118,7 +122,7 @@ function EligibilityCheckerContent() {
                 style={{ marginTop: "3px" }}
               />
               <div>
-                <strong>State Government / Local Authority</strong>
+                <strong>State Government / Union Territory</strong>
                 <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
                   State Police, Municipal Corporations, District Collectors, Ration Cards, Land Revenue, State Electricity Boards.
                 </div>
@@ -142,43 +146,83 @@ function EligibilityCheckerContent() {
             </label>
           </div>
 
-          {/* State Redirection Box */}
+          {/* State / UT Resolution Section */}
           {jurisdiction === "STATE" && (
-            <div style={{ marginTop: "16px", padding: "16px", background: "var(--neutral-50)", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)" }}>
+            <div style={{ marginTop: "18px", padding: "18px", background: "var(--neutral-50)", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)" }}>
               <strong style={{ fontSize: "0.875rem", color: "var(--gov-navy-950)", display: "block", marginBottom: "6px" }}>
-                State RTIs cannot be filed on the Central portal
+                Select your State / Union Territory (All 36 States &amp; UTs)
               </strong>
               <p style={{ fontSize: "0.8125rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                Select your state to visit their designated state portal or generate a postal application:
+                Central RTI Online does not receive state applications. Choose your state to route correctly:
               </p>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
+
+              <div style={{ marginBottom: "14px" }}>
                 <select
                   value={selectedState}
                   onChange={(e) => setSelectedState(e.target.value)}
                   className="form-control"
-                  style={{ flex: "1 1 200px" }}
+                  style={{ width: "100%", background: "#ffffff" }}
                 >
-                  {stateRtiPortalsDatabase.map((s) => (
-                    <option key={s.stateName} value={s.stateName}>
-                      {s.stateName}
-                    </option>
-                  ))}
+                  <optgroup label="States with official online RTI portals">
+                    {statesWithOnlinePortals.map((s) => (
+                      <option key={s.stateName} value={s.stateName}>
+                        {s.stateName} (Online Portal Available)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="States & UTs requiring offline / postal filing">
+                    {statesRequiringOfflineFiling.map((s) => (
+                      <option key={s.stateName} value={s.stateName}>
+                        {s.stateName} (Postal / Offline Application)
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
-                {matchedState?.hasOnlinePortal && (
-                  <a
-                    href={matchedState.portalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary-action"
-                    style={{ padding: "8px 14px", fontSize: "0.875rem" }}
-                  >
-                    Go to State Portal ↗
-                  </a>
-                )}
               </div>
-              <Link href="/offline" style={{ fontSize: "0.8125rem", color: "var(--gov-blue-600)" }}>
-                Or prepare an offline RTI letter for postal submission →
-              </Link>
+
+              {/* Dynamic State Info Box */}
+              {matchedState && (
+                <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "14px", marginTop: "10px" }}>
+                  {matchedState.hasOnlinePortal ? (
+                    <div>
+                      <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--success-600)", marginBottom: "4px" }}>
+                        ✓ Official State Online Portal Active
+                      </div>
+                      <p style={{ fontSize: "0.8125rem", color: "var(--neutral-700)", margin: "0 0 10px", lineHeight: "1.4" }}>
+                        {matchedState.notes}
+                      </p>
+                      <a
+                        href={matchedState.portalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary-action"
+                        style={{ display: "inline-block", padding: "8px 16px", fontSize: "0.8125rem", textDecoration: "none" }}
+                      >
+                        Visit {matchedState.stateName} RTI Portal ↗
+                      </a>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--warning-600)", marginBottom: "4px" }}>
+                        ⚠ No Centralized Online Portal in {matchedState.stateName}
+                      </div>
+                      <p style={{ fontSize: "0.8125rem", color: "var(--neutral-700)", margin: "0 0 6px", lineHeight: "1.4" }}>
+                        {matchedState.notes}
+                      </p>
+                      <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", marginBottom: "12px" }}>
+                        Statutory fee: <strong>₹{matchedState.feeAmount}</strong> via Indian Postal Order (IPO) payable to <em>&quot;{matchedState.ipoPayableTo}&quot;</em>.
+                      </div>
+                      <Link
+                        href={`/offline?state=${encodeURIComponent(matchedState.stateName)}`}
+                        className="btn-primary-action"
+                        style={{ display: "inline-block", padding: "8px 16px", fontSize: "0.8125rem", textDecoration: "none" }}
+                      >
+                        Generate Offline RTI Letter for {matchedState.stateName} →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
