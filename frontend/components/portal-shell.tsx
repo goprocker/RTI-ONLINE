@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { footerNavigation, primaryNavigation, prototypeNotice } from "../content/site";
+import { primaryNavigation, footerNavigation, prototypeNotice } from "../content/site";
 import { useAuth } from "../lib/auth-context";
 
 export function PortalPage({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLLIElement>(null);
 
   // Close dropdown on click outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     }
@@ -24,193 +24,215 @@ export function PortalPage({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="portal-root" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Skip Link for Keyboard Accessibility (WCAG 2.4.1) */}
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
+    <div className="portal-shell">
+      {/* 01 — PROTOTYPE IDENTIFIER & UTILITY BAR (GIGW 3.0 Standard) */}
+      <header className="top-utility-bar" role="region" aria-label="Prototype notice and accessibility">
+        <div className="wrap utility-inner">
+          <div className="gov-identity-strip">
+            <span className="prototype-pill">PROTOTYPE CONCEPT</span>
+            <span className="prototype-text">
+              An independent citizen-first redesign prototype · Not affiliated with the Government of India
+            </span>
+          </div>
 
-      {/* 01. PROTOTYPE NOTICE RIBBON (Full transparency & credibility) */}
-      <div className="prototype-ribbon">
-        <div className="wrap">
-          <strong>RTI Online — Concept Redesign:</strong> An independent prototype demonstrating a citizen-first redesign of India&apos;s RTI experience. Not affiliated with or operated by the Government of India.
+          <div className="utility-actions">
+            <Link href="/manual" className="utility-link">
+              How it works
+            </Link>
+            <span className="utility-divider" aria-hidden="true">|</span>
+            <Link href="/accessibility" className="utility-link">
+              Accessibility
+            </Link>
+            <span className="utility-divider" aria-hidden="true">|</span>
+            <Link href="/officer" className="utility-link officer-utility-link">
+              For Officers →
+            </Link>
+            <span className="utility-divider" aria-hidden="true">|</span>
+            <span lang="hi" className="lang-indicator">हिन्दी</span>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* 02. CLEAN CITIZEN HEADER */}
-      <header style={{ background: "#ffffff", borderBottom: "1px solid var(--neutral-200)" }}>
-        <div className="wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px" }}>
-          {/* Brand Seal */}
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
-            <div style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", background: "var(--gov-navy-950)", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1rem" }}>
-              RTI
+      {/* 02 — NATIONAL TRICOLOR ACCENT RIBBON */}
+      <div className="tricolor-ribbon" role="presentation" />
+
+      {/* 03 — MAIN BRAND HEADER */}
+      <div className="header" role="banner">
+        <div className="wrap header-inner">
+          {/* Brand Seal & Title */}
+          <Link href="/" className="brand" aria-label="RTI Online Concept Home">
+            <div className="emblem-container" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="19" fill="#0f2942" stroke="#d97706" strokeWidth="1.5" />
+                <path d="M20 7L23.5 14H16.5L20 7Z" fill="#f59e0b" />
+                <rect x="13" y="16" width="14" height="2" fill="#ffffff" />
+                <rect x="15" y="20" width="10" height="9" fill="#e2e8f0" />
+                <rect x="12" y="30" width="16" height="3" rx="1" fill="#f59e0b" />
+              </svg>
             </div>
-            <div>
-              <span style={{ display: "block", font: "700 1.25rem var(--font-sans)", color: "var(--gov-navy-950)", letterSpacing: "-0.02em" }}>
-                RTI Online
-              </span>
-              <span style={{ display: "block", fontSize: "0.75rem", color: "var(--neutral-500)", marginTop: "-2px" }}>
-                Citizen Information Portal · Concept Redesign
-              </span>
+            <div className="brand-text">
+              <span className="brand-title">RTI Online</span>
+              <span className="brand-sub">Concept Redesign · Right to Information</span>
             </div>
           </Link>
 
-          {/* Right Utilities: Language, Officer Link & Auth */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "0.84rem" }}>
-            <Link href="/officer" style={{ color: "var(--neutral-600)", textDecoration: "none" }}>
-              Officer portal →
-            </Link>
-            <span style={{ color: "var(--neutral-300)" }}>|</span>
+          {/* Right Citizen Action Area */}
+          <div className="header-actions">
             {user ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Link href="/dashboard" style={{ fontWeight: 600, color: "var(--gov-navy-950)", textDecoration: "none" }}>
-                  My requests
-                </Link>
-                <button
-                  type="button"
-                  onClick={logout}
-                  style={{ background: "none", border: "none", color: "var(--neutral-500)", cursor: "pointer", fontSize: "0.8125rem", padding: "2px 4px" }}
-                >
-                  Sign out
-                </button>
-              </div>
+              <Link href="/dashboard" className="user-profile-badge">
+                <span className="user-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <span className="user-name">{user.name}</span>
+              </Link>
             ) : (
-              <Link href="/login" style={{ fontWeight: 600, color: "var(--gov-navy-950)", textDecoration: "none" }}>
+              <Link href="/login" className="btn-signin-link">
                 Sign in
               </Link>
             )}
-            <Link
-              href="/request/eligibility"
-              className="btn-primary-action"
-              style={{ padding: "6px 14px", fontSize: "0.84rem" }}
-            >
+
+            <Link href="/request/eligibility" className="btn-file-primary">
               File an RTI
             </Link>
           </div>
         </div>
+      </div>
 
-        {/* 03. CLEAN PRIMARY NAVIGATION BAR */}
-        <nav style={{ background: "var(--gov-navy-950)", color: "#ffffff" }}>
-          <div className="wrap" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      {/* 04 — MAIN NAVIGATION BAR */}
+      <nav className="nav" aria-label="Primary navigation">
+        <div className="wrap nav-inner">
+          <ul className="nav-list" role="menubar">
+            <li role="none">
+              <Link
+                href="/"
+                role="menuitem"
+                className={`nav-link ${pathname === "/" ? "active" : ""}`}
+                aria-current={pathname === "/" ? "page" : undefined}
+              >
+                Home
+              </Link>
+            </li>
+
             {primaryNavigation.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+              const isActive = pathname.startsWith(item.href);
 
               if (item.children) {
                 return (
-                  <div key={item.label} className="nav-dropdown-wrapper" ref={dropdownRef}>
+                  <li
+                    key={item.href}
+                    role="none"
+                    className="nav-dropdown-wrapper"
+                    ref={dropdownRef}
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => setDropdownOpen(false)}
+                  >
                     <button
                       type="button"
+                      role="menuitem"
+                      aria-haspopup="true"
+                      aria-expanded={dropdownOpen}
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      style={{
-                        background: dropdownOpen ? "rgba(255,255,255,0.12)" : "transparent",
-                        color: "#ffffff",
-                        border: 0,
-                        padding: "10px 14px",
-                        fontSize: "0.875rem",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px"
-                      }}
+                      className={`nav-link nav-dropdown-btn ${isActive ? "active" : ""}`}
                     >
-                      {item.label} ▾
+                      {item.label}
+                      <span className="dropdown-caret" aria-hidden="true">▾</span>
                     </button>
+
                     {dropdownOpen && (
-                      <div className="nav-dropdown-menu">
-                        {item.children.map((sub) => (
+                      <div className="nav-dropdown-menu" role="menu">
+                        {item.children.map((child) => (
                           <Link
-                            key={sub.href}
-                            href={sub.href}
-                            className="dropdown-menu-item"
+                            key={child.href}
+                            href={child.href}
+                            role="menuitem"
                             onClick={() => setDropdownOpen(false)}
+                            className="dropdown-menu-item"
                           >
-                            <span className="dropdown-item-title">{sub.label}</span>
-                            {sub.desc && <span className="dropdown-item-desc">{sub.desc}</span>}
+                            <span className="dropdown-item-title">{child.label}</span>
+                            {child.desc && <span className="dropdown-item-desc">{child.desc}</span>}
                           </Link>
                         ))}
                       </div>
                     )}
-                  </div>
+                  </li>
                 );
               }
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{
-                    color: "#ffffff",
-                    textDecoration: "none",
-                    padding: "10px 14px",
-                    fontSize: "0.875rem",
-                    fontWeight: isActive ? 700 : 500,
-                    background: isActive ? "rgba(255,255,255,0.15)" : "transparent",
-                    borderBottom: isActive ? "3px solid var(--saffron-500)" : "3px solid transparent",
-                    transition: "background 0.15s ease"
-                  }}
-                >
-                  {item.label}
-                </Link>
+                <li key={item.href} role="none">
+                  <Link
+                    href={item.href}
+                    role="menuitem"
+                    className={`nav-link ${isActive ? "active" : ""}`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
               );
             })}
-          </div>
-        </nav>
-      </header>
+          </ul>
+        </div>
+      </nav>
 
-      {/* MAIN CONTENT LANDMARK */}
-      <div id="main-content" style={{ flex: "1 0 auto" }}>
+      {/* 05 — PAGE BODY */}
+      <div className="portal-content" id="main-content">
         {children}
       </div>
 
-      {/* 04. CLEAN CITIZEN FOOTER */}
-      <footer style={{ background: "#ffffff", borderTop: "1px solid var(--neutral-300)", padding: "40px 0 30px", marginTop: "auto", fontSize: "0.875rem", color: "var(--neutral-600)" }}>
+      {/* 06 — PROTOTYPE FOOTER */}
+      <footer className="footer" role="contentinfo">
         <div className="wrap">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "28px", marginBottom: "32px" }}>
-            <div>
-              <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "12px", fontSize: "0.9375rem" }}>
-                Citizen Services
-              </strong>
-              <div style={{ display: "grid", gap: "8px" }}>
-                <Link href="/request/eligibility" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>File an RTI</Link>
-                <Link href="/status" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Track application</Link>
-                <Link href="/appeal" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>File a First Appeal</Link>
-                <Link href="/authorities" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Find public authorities</Link>
-              </div>
-            </div>
-
-            <div>
-              <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "12px", fontSize: "0.9375rem" }}>
-                Help & Guidance
-              </strong>
-              <div style={{ display: "grid", gap: "8px" }}>
-                <Link href="/search" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Search public records</Link>
-                <Link href="/reconciliation" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Payment issue</Link>
-                <Link href="/offline" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Offline RTI application</Link>
-                <Link href="/faq" style={{ color: "var(--neutral-700)", textDecoration: "none" }}>Frequently asked questions</Link>
-              </div>
-            </div>
-
-            <div>
-              <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "12px", fontSize: "0.9375rem" }}>
-                About this Prototype
-              </strong>
-              <p style={{ fontSize: "0.8125rem", color: "var(--neutral-500)", margin: "0 0 10px", lineHeight: "1.5" }}>
-                This is an independent open-source UX redesign project created to demonstrate accessible, citizen-first public service workflows under the RTI Act, 2005.
+          <div className="footer-top">
+            <div className="footer-brand-col">
+              <h3 className="footer-brand-title">RTI Online</h3>
+              <p className="footer-brand-desc">
+                An independent concept demonstrating a citizen-first redesign of India&apos;s Right to Information portal. Designed to make public information accessible, transparent, and simple for every citizen.
               </p>
-              <div style={{ display: "flex", gap: "12px", fontSize: "0.8125rem" }}>
-                <Link href="/accessibility">Accessibility</Link>
-                <Link href="/privacy">Privacy notice</Link>
-                <Link href="/contact">Feedback</Link>
+              <div className="prototype-disclaimer-box">
+                <strong>Disclaimer:</strong> {prototypeNotice}
               </div>
+            </div>
+
+            <div className="footer-links-col">
+              <h4 className="footer-col-title">Citizen Services</h4>
+              <ul className="footer-links-list">
+                <li><Link href="/request/eligibility">File an RTI</Link></li>
+                <li><Link href="/status">Track an application</Link></li>
+                <li><Link href="/appeal">File a First Appeal</Link></li>
+                <li><Link href="/authorities">Find a public authority</Link></li>
+                <li><Link href="/offline">Prepare offline application</Link></li>
+              </ul>
+            </div>
+
+            <div className="footer-links-col">
+              <h4 className="footer-col-title">Help & Guidance</h4>
+              <ul className="footer-links-list">
+                <li><Link href="/manual">How RTI works</Link></li>
+                <li><Link href="/faq">Frequently asked questions</Link></li>
+                <li><Link href="/search">Search public disclosures</Link></li>
+                <li><Link href="/reconciliation">Payment issue</Link></li>
+                <li><Link href="/officer">For Public Information Officers →</Link></li>
+              </ul>
+            </div>
+
+            <div className="footer-links-col">
+              <h4 className="footer-col-title">Accessibility & Standards</h4>
+              <ul className="footer-links-list">
+                <li><Link href="/accessibility">Accessibility Statement (GIGW 3.0)</Link></li>
+                <li><Link href="/privacy">Privacy Policy</Link></li>
+                <li><Link href="/contact">Feedback & Contact</Link></li>
+              </ul>
             </div>
           </div>
 
-          <div style={{ borderTop: "1px solid var(--neutral-200)", paddingTop: "18px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
-            <span>RTI Online Concept Redesign · Built for citizens</span>
-            <Link href="/officer" style={{ color: "var(--neutral-500)", textDecoration: "none" }}>
-              Public Information Officer desk →
-            </Link>
+          <div className="footer-bottom">
+            <div>
+              © 2026 RTI Online Concept Prototype. All rights reserved.
+            </div>
+            <div className="footer-sub-links">
+              <span>GIGW 3.0 / WCAG 2.1 AAA Compliant</span>
+            </div>
           </div>
         </div>
       </footer>

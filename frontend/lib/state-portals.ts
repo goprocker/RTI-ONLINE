@@ -1,295 +1,264 @@
-export interface StatePortalItem {
-  stateName: string;
+export interface StatePortalInfo {
+  state: string;
   hasOnlinePortal: boolean;
   portalUrl?: string;
   portalName?: string;
-  notes: string;
-  feeAmount: number;
-  ipoPayableTo: string;
+  feeMode: string;
+  description: string;
 }
 
-export const allStatesAndUTs: StatePortalItem[] = [
-  // ─── STATES WITH AN ACTIVE ONLINE PORTAL ───
+export const allIndiaStatePortals: StatePortalInfo[] = [
+  // STATES WITH OPERATIONAL ONLINE PORTALS
   {
-    stateName: "Delhi (NCT)",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtionline.delhi.gov.in",
-    portalName: "e-RTI Portal Government of NCT of Delhi",
-    notes: "For Delhi Jal Board, MCD, DDA (State wings), Directorate of Education.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Concerned Department, Delhi"
-  },
-  {
-    stateName: "Himachal Pradesh",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtionline.hp.gov.in",
-    portalName: "RTI Online Himachal Pradesh",
-    notes: "For HP Police, HPSEB, Revenue Dept, Education Department.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Department of Personnel, HP"
-  },
-  {
-    stateName: "Karnataka",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtionline.karnataka.gov.in",
-    portalName: "RTI Online Karnataka (Mahiti Kanaja)",
-    notes: "For BBMP, Bengaluru Police, Bescom, BDA, Tahsildar offices.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer / Accounts Officer"
-  },
-  {
-    stateName: "Kerala",
-    hasOnlinePortal: true,
-    portalUrl: "https://rti.kerala.gov.in",
-    portalName: "State RTI Portal Kerala",
-    notes: "For Kerala State Police, KSEB, KSRTC, Local Self Government Dept.",
-    feeAmount: 10,
-    ipoPayableTo: "State Public Information Officer, Kerala"
-  },
-  {
-    stateName: "Maharashtra",
+    state: "Maharashtra",
     hasOnlinePortal: true,
     portalUrl: "https://rtionline.maharashtra.gov.in",
-    portalName: "RTI Online Maharashtra",
-    notes: "For Mumbai Police, BMC, Revenue Dept, MHADA, State Transport.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Concerned Department, Maharashtra"
+    portalName: "Maharashtra RTI Online Portal",
+    feeMode: "Online Payment (NetBanking / UPI / Debit Card)",
+    description: "Centralized portal for all Maharashtra state departments and collectorates."
   },
   {
-    stateName: "Meghalaya",
+    state: "Karnataka",
     hasOnlinePortal: true,
-    portalUrl: "https://megrti.gov.in",
-    portalName: "Meghalaya RTI Portal",
-    notes: "For Meghalaya Police, PWD, Health & Family Welfare.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Meghalaya"
+    portalUrl: "https://kic.karnataka.gov.in",
+    portalName: "Karnataka Information Commission RTI Portal",
+    feeMode: "Online Payment via KII Portal",
+    description: "Online filing available for Secretariat departments and district offices."
   },
   {
-    stateName: "Odisha",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtiodisha.gov.in",
-    portalName: "RTI Odisha Central Portal",
-    notes: "For Odisha Police, BMC Bhubaneswar, Revenue & Disaster Management.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Concerned Department, Odisha"
-  },
-  {
-    stateName: "Puducherry",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtionline.py.gov.in",
-    portalName: "RTI Online Puducherry",
-    notes: "For Puducherry Police, Electricity Department, Municipalities.",
-    feeAmount: 10,
-    ipoPayableTo: "Junior Accounts Officer, Puducherry"
-  },
-  {
-    stateName: "Rajasthan",
-    hasOnlinePortal: true,
-    portalUrl: "https://rtionline.rajasthan.gov.in",
-    portalName: "RTI Online Rajasthan",
-    notes: "For Rajasthan Police, Jaipur Development Authority, RIICO, Discoms.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Government of Rajasthan"
-  },
-  {
-    stateName: "Tamil Nadu",
+    state: "Tamil Nadu",
     hasOnlinePortal: true,
     portalUrl: "https://rtionline.tn.gov.in",
-    portalName: "Tamil Nadu RTI Online",
-    notes: "For TN Police, Greater Chennai Corporation, TNEB, Registration Dept.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Concerned Department, Tamil Nadu"
+    portalName: "Tamil Nadu RTI Online Portal",
+    feeMode: "Online Payment (₹10 standard fee)",
+    description: "State-wide portal for all Tamil Nadu state public authorities."
   },
   {
-    stateName: "Uttar Pradesh",
+    state: "Delhi (NCT)",
+    hasOnlinePortal: true,
+    portalUrl: "https://rtionline.delhi.gov.in",
+    portalName: "Delhi RTI Online Portal",
+    feeMode: "Online Payment via Payment Gateway",
+    description: "Covers Delhi Government departments, autonomous bodies, and municipal corporations."
+  },
+  {
+    state: "Uttar Pradesh",
     hasOnlinePortal: true,
     portalUrl: "https://rtionline.up.gov.in",
-    portalName: "RTI Online Uttar Pradesh",
-    notes: "For UP Police, Noida Authority, Nagar Nigam, Basic Shiksha Parishad.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Concerned Department, UP"
+    portalName: "Uttar Pradesh RTI Online Portal",
+    feeMode: "Online Payment (UPI / NetBanking)",
+    description: "Comprehensive portal for UP Secretariat and regional district authorities."
+  },
+  {
+    state: "Rajasthan",
+    hasOnlinePortal: true,
+    portalUrl: "https://rti.rajasthan.gov.in",
+    portalName: "Rajasthan RTI Portal",
+    feeMode: "e-Mitra / Online Gateway",
+    description: "State RTI portal integrated with Rajasthan e-Mitra payment system."
+  },
+  {
+    state: "Kerala",
+    hasOnlinePortal: true,
+    portalUrl: "https://rtionline.kerala.gov.in",
+    portalName: "Kerala RTI Online Portal",
+    feeMode: "e-Treasury / Online Payment",
+    description: "Online filing across Kerala state administrative departments."
+  },
+  {
+    state: "Bihar",
+    hasOnlinePortal: true,
+    portalUrl: "http://jaankari.bihar.gov.in",
+    portalName: "Jaankari Bihar RTI Facilitation",
+    feeMode: "Phone-in / e-Payment / IPO",
+    description: "Bihar state RTI facilitation center and portal."
+  },
+  {
+    state: "Odisha",
+    hasOnlinePortal: true,
+    portalUrl: "https://rtiodisha.gov.in",
+    portalName: "RTI Central Monitoring Mechanism Odisha",
+    feeMode: "Odisha Treasury Online Gateway",
+    description: "Online RTI tracking and submission across Odisha state departments."
+  },
+  {
+    state: "Gujarat",
+    hasOnlinePortal: true,
+    portalUrl: "https://rti.gujarat.gov.in",
+    portalName: "Gujarat RTI Portal",
+    feeMode: "Cyber Treasury Gujarat",
+    description: "Portal for Gujarat state secretariat and municipal departments."
+  },
+  {
+    state: "Haryana",
+    hasOnlinePortal: true,
+    portalUrl: "https://rtiharyana.gov.in",
+    portalName: "Haryana RTI Online Portal",
+    feeMode: "Online Gateway (₹10 fee)",
+    description: "Filing and tracking across Haryana public authorities."
+  },
+  {
+    state: "Himachal Pradesh",
+    hasOnlinePortal: true,
+    portalUrl: "https://rtionline.hp.gov.in",
+    portalName: "Himachal Pradesh RTI Online Portal",
+    feeMode: "Himkosh Online Gateway",
+    description: "State portal for HP government offices."
+  },
+  {
+    state: "Madhya Pradesh",
+    hasOnlinePortal: true,
+    portalUrl: "http://rtionline.mp.gov.in",
+    portalName: "MP RTI Online Portal",
+    feeMode: "MP Online Gateway",
+    description: "State portal across Madhya Pradesh departments."
+  },
+  {
+    state: "West Bengal",
+    hasOnlinePortal: true,
+    portalUrl: "https://wbic.gov.in",
+    portalName: "West Bengal Information Commission",
+    feeMode: "GRIPS e-Challan / Court Fee",
+    description: "Online resources and departmental RTI directory for West Bengal."
+  },
+  {
+    state: "Telangana",
+    hasOnlinePortal: true,
+    portalUrl: "https://tsic.gov.in",
+    portalName: "Telangana Information Commission Portal",
+    feeMode: "Online Treasury Payment",
+    description: "State commission portal and public authority directory."
+  },
+  {
+    state: "Andhra Pradesh",
+    hasOnlinePortal: true,
+    portalUrl: "https://apic.gov.in",
+    portalName: "Andhra Pradesh Information Commission",
+    feeMode: "CFMS Online Payment",
+    description: "State portal for Andhra Pradesh government bodies."
+  },
+  {
+    state: "Punjab",
+    hasOnlinePortal: true,
+    portalUrl: "https://infocommpunjab.com",
+    portalName: "Punjab State Information Commission",
+    feeMode: "Treasury Challan / Postal Order",
+    description: "Online guidance and physical submission directory for Punjab."
   },
 
-  // ─── STATES & UNION TERRITORIES REQUIRING OFFLINE / POSTAL SUBMISSION ───
+  // STATES & UTs WITHOUT CENTRALIZED ONLINE PORTAL (REQUIRES OFFLINE SECTION 6(1) FILING)
   {
-    stateName: "Andaman and Nicobar Islands",
+    state: "Goa",
     hasOnlinePortal: false,
-    notes: "Requires physical or postal submission with Indian Postal Order (IPO).",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Andaman & Nicobar Administration, Port Blair"
+    feeMode: "Indian Postal Order (IPO) / Court Fee Stamp",
+    description: "Goa state departments currently accept physical applications under Section 6(1) with IPO or Court Fee Stamp."
   },
   {
-    stateName: "Andhra Pradesh",
+    state: "Assam",
     hasOnlinePortal: false,
-    notes: "Requires physical submission or postal dispatch to the concerned State PIO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer / Public Information Officer, Andhra Pradesh"
+    feeMode: "Indian Postal Order (IPO) / Treasury Challan",
+    description: "Physical submission to concerned SPIO with ₹10 Indian Postal Order or Court Fee Stamp."
   },
   {
-    stateName: "Arunachal Pradesh",
+    state: "Jharkhand",
     hasOnlinePortal: false,
-    notes: "Requires physical application or registered post with ₹10 IPO/Court Fee Stamp.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Concerned Directorate, Itanagar"
+    feeMode: "Indian Postal Order / Non-Judicial Stamp",
+    description: "Physical submission to State Public Information Officer (SPIO)."
   },
   {
-    stateName: "Assam",
+    state: "Chhattisgarh",
     hasOnlinePortal: false,
-    notes: "Requires postal application addressed to the Departmental SPIO with ₹10 IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer / SPIO, Assam Secretariat, Dispur"
+    feeMode: "Indian Postal Order / Cash at Counter",
+    description: "Physical application submitted directly to the concerned departmental SPIO."
   },
   {
-    stateName: "Bihar",
+    state: "Uttarakhand",
     hasOnlinePortal: false,
-    notes: "Requires physical postal application under Section 6(1) with ₹10 Court Fee Stamp/IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Government of Bihar, Patna"
+    feeMode: "Indian Postal Order / Treasury Challan",
+    description: "Physical application per Uttarakhand RTI Rules 2013."
   },
   {
-    stateName: "Chandigarh",
+    state: "Arunachal Pradesh",
     hasOnlinePortal: false,
-    notes: "Requires postal application to Chandigarh Administration PIO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Chandigarh Administration"
+    feeMode: "Indian Postal Order (IPO) of ₹10",
+    description: "Physical submission to PIO at District Headquarters or Itanagar Secretariat."
   },
   {
-    stateName: "Chhattisgarh",
+    state: "Manipur",
     hasOnlinePortal: false,
-    notes: "Requires registered post application addressed to State PIO with ₹10 Non-Judicial Stamp/IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Government of Chhattisgarh, Raipur"
+    feeMode: "Indian Postal Order / Court Fee Stamp",
+    description: "Physical filing with concerned Departmental SPIO."
   },
   {
-    stateName: "Dadra and Nagar Haveli and Daman and Diu",
+    state: "Meghalaya",
     hasOnlinePortal: false,
-    notes: "Requires postal application to Resident Deputy Collector / PIO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, UT Administration of DNH & DD"
+    feeMode: "Indian Postal Order / Treasury Challan",
+    description: "Physical filing with SPIO in Shillong or District offices."
   },
   {
-    stateName: "Goa",
+    state: "Mizoram",
     hasOnlinePortal: false,
-    notes: "Requires application on plain paper to Department PIO with ₹10 Court Fee Stamp.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Government of Goa, Panaji"
+    feeMode: "Indian Postal Order (IPO)",
+    description: "Physical submission to Mizoram State PIO."
   },
   {
-    stateName: "Gujarat",
+    state: "Nagaland",
     hasOnlinePortal: false,
-    notes: "Requires physical submission or postal dispatch to the concerned Gandhinagar Directorate.",
-    feeAmount: 20,
-    ipoPayableTo: "Accounts Officer, Concerned Department, Gandhinagar"
+    feeMode: "Indian Postal Order / Treasury Receipt",
+    description: "Physical submission to Kohima Secretariat or district PIO."
   },
   {
-    stateName: "Haryana",
+    state: "Sikkim",
     hasOnlinePortal: false,
-    notes: "Requires registered postal application with ₹10 Indian Postal Order (IPO) or Treasury Challan.",
-    feeAmount: 10,
-    ipoPayableTo: "State Public Information Officer, Haryana Civil Secretariat, Chandigarh"
+    feeMode: "Bank Receipt / Indian Postal Order",
+    description: "Physical submission under Sikkim RTI Rules."
   },
   {
-    stateName: "Jammu and Kashmir",
+    state: "Tripura",
     hasOnlinePortal: false,
-    notes: "Requires postal application addressed to the Central / UT PIO with ₹10 IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, J&K Administration"
+    feeMode: "Indian Postal Order / Court Fee Stamp",
+    description: "Physical submission to Tripura State PIO."
   },
   {
-    stateName: "Jharkhand",
+    state: "Jammu and Kashmir",
     hasOnlinePortal: false,
-    notes: "Requires physical application addressed to Department SPIO with ₹10 Court Fee Stamp.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Government of Jharkhand, Ranchi"
+    feeMode: "Indian Postal Order / Court Fee Stamp",
+    description: "Physical submission to UT Department PIO."
   },
   {
-    stateName: "Ladakh",
+    state: "Ladakh",
     hasOnlinePortal: false,
-    notes: "Requires postal application to the Deputy Commissioner / UT PIO in Leh or Kargil.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, UT Administration of Ladakh, Leh"
+    feeMode: "Indian Postal Order (IPO)",
+    description: "Physical submission to Deputy Commissioner or UT PIO."
   },
   {
-    stateName: "Lakshadweep",
+    state: "Puducherry",
     hasOnlinePortal: false,
-    notes: "Requires postal application to the Lakshadweep Administration PIO in Kavaratti.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Lakshadweep Administration, Kavaratti"
+    feeMode: "Indian Postal Order / Cash at Counter",
+    description: "Physical submission to Departmental SPIO in Puducherry / Karaikal."
   },
   {
-    stateName: "Madhya Pradesh",
+    state: "Chandigarh",
     hasOnlinePortal: false,
-    notes: "Requires application to Department SPIO with ₹10 Non-Judicial Stamp or Postal Order.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Vallabh Bhavan, Bhopal"
+    feeMode: "Indian Postal Order / Court Fee Stamp",
+    description: "Physical submission to UT Administration PIO."
   },
   {
-    stateName: "Manipur",
+    state: "Andaman and Nicobar Islands",
     hasOnlinePortal: false,
-    notes: "Requires postal application to State PIO with ₹10 Court Fee Stamp.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Manipur Secretariat, Imphal"
+    feeMode: "Indian Postal Order (IPO)",
+    description: "Physical submission to Port Blair Secretariat or DC Office."
   },
   {
-    stateName: "Mizoram",
+    state: "Dadra and Nagar Haveli and Daman and Diu",
     hasOnlinePortal: false,
-    notes: "Requires postal application to Department SPIO with ₹10 Indian Postal Order.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Mizoram Secretariat, Aizawl"
+    feeMode: "Indian Postal Order (IPO)",
+    description: "Physical submission to UT Collectorate PIO."
   },
   {
-    stateName: "Nagaland",
+    state: "Lakshadweep",
     hasOnlinePortal: false,
-    notes: "Requires postal application to Department PIO with ₹10 Treasury Receipt / IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Nagaland Civil Secretariat, Kohima"
-  },
-  {
-    stateName: "Punjab",
-    hasOnlinePortal: false,
-    notes: "Requires postal application to Department PIO with ₹10 IPO or Court Fee Stamp.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Punjab Civil Secretariat, Chandigarh"
-  },
-  {
-    stateName: "Sikkim",
-    hasOnlinePortal: false,
-    notes: "Requires postal application to State PIO with ₹10 Bank Receipt / IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Government of Sikkim, Gangtok"
-  },
-  {
-    stateName: "Telangana",
-    hasOnlinePortal: false,
-    notes: "Requires postal application addressed to the concerned Department SPIO with ₹10 IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer / State PIO, Telangana Secretariat, Hyderabad"
-  },
-  {
-    stateName: "Tripura",
-    hasOnlinePortal: false,
-    notes: "Requires postal application with ₹10 Court Fee Stamp or IPO.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, New Secretariat Complex, Agartala"
-  },
-  {
-    stateName: "Uttarakhand",
-    hasOnlinePortal: false,
-    notes: "Requires postal application addressed to Department SPIO with ₹10 IPO or Treasury Challan.",
-    feeAmount: 10,
-    ipoPayableTo: "Accounts Officer, Uttarakhand Secretariat, Dehradun"
-  },
-  {
-    stateName: "West Bengal",
-    hasOnlinePortal: false,
-    notes: "Requires postal application with ₹10 Court Fee Stamp or IPO addressed to Department SPIO.",
-    feeAmount: 10,
-    ipoPayableTo: "Public Information Officer, Nabanna, Howrah / Kolkata"
+    feeMode: "Indian Postal Order (IPO)",
+    description: "Physical submission to Administrator Office, Kavaratti."
   }
 ];
-
-export const statesWithOnlinePortals = allStatesAndUTs.filter((s) => s.hasOnlinePortal);
-export const statesRequiringOfflineFiling = allStatesAndUTs.filter((s) => !s.hasOnlinePortal);
-
-export const stateRTIPortals = allStatesAndUTs;
-export const stateRtiPortalsDatabase = allStatesAndUTs;

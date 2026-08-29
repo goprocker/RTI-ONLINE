@@ -13,9 +13,8 @@ export type RTIStatus =
 
 export interface TimelineEvent {
   stage: string;
-  title?: string;
-  description?: string;
-  desc?: string;
+  title: string;
+  description: string;
   date: string;
   completed: boolean;
   current?: boolean;
@@ -27,7 +26,7 @@ export interface CitizenUser {
   email: string;
   mobile: string;
   address: string;
-  city?: string;
+  city: string;
   state: string;
   pincode: string;
   gender?: string;
@@ -36,42 +35,24 @@ export interface CitizenUser {
   bplCardNo?: string;
 }
 
-export interface AdditionalFeeInfo {
-  required: boolean;
-  pages: number;
-  amount: number;
-  paid: boolean;
-}
-
-export interface ClarificationInfo {
-  reason: string;
-  uploadedDocName?: string;
-}
-
-export interface ResponseOrderInfo {
-  summary: string;
-  pdfUrl: string;
-  orderDate?: string;
-}
-
 export interface RTIApplication {
   id: string;
   regNo: string;
   filingDate: string;
   ministry: string;
   department: string;
-  publicAuthority?: string;
-  nodalOfficerRouting?: string;
+  publicAuthority: string;
+  nodalOfficerRouting: string;
   cpioName?: string;
   subject: string;
   queryText: string;
   status: RTIStatus;
   statusLabel: string;
-  statutoryWindowDays?: number;
+  statutoryWindowDays: number;
   remainingDays: number;
   expectedDate: string;
   feePaid: number;
-  paymentMode?: string;
+  paymentMode: string;
   paymentRef: string;
   isBPL: boolean;
   bplDocName?: string;
@@ -81,25 +62,23 @@ export interface RTIApplication {
   applicantMobile: string;
   applicantAddress: string;
   timeline: TimelineEvent[];
-  currentStageText?: string;
-  // State specific
+  responseSummary?: string;
+  responseDocUrl?: string;
+  // In-flight specific states
   isTransferred?: boolean;
   transferFrom?: string;
   transferTo?: string;
   transferReason?: string;
   docRequested?: boolean;
-  clarificationRequest?: ClarificationInfo;
+  docRequestReason?: string;
   uploadedClarificationDoc?: string;
-  additionalFeeRequired?: AdditionalFeeInfo;
-  additionalFeeAmount?: number;
+  additionalFeeRequired?: boolean;
   photocopyPages?: number;
+  additionalFeeAmount?: number;
   additionalFeePaid?: boolean;
   isResolvedSatisfied?: boolean;
   appealFiled?: boolean;
   appealRegNo?: string;
-  responseSummary?: string;
-  responseDocUrl?: string;
-  responseOrder?: ResponseOrderInfo;
 }
 
 export interface FirstAppeal {
@@ -127,9 +106,9 @@ export interface AuthorityItem {
   department: string;
   category: string;
   keywords: string[];
+  commonTopics?: string[];
   nodalOfficerDesc: string;
   portalUrl?: string;
-  commonTopics?: string[];
 }
 
 export interface PaymentReconciliationResult {
