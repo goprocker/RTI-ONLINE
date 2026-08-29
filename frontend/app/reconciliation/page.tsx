@@ -1,174 +1,128 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { PortalPage } from "../../components/portal-shell";
-import { useAuth } from "../../lib/auth-context";
-import { PaymentReconciliationResult } from "../../types/rti";
 
-export default function ReconciliationPage() {
-  const { reconcilePayment } = useAuth();
-  const [txRef, setTxRef] = useState("SBI-UPI-884910294");
-  const [emailOrMobile, setEmailOrMobile] = useState("rajesh.sharma@example.gov.in");
-  const [result, setResult] = useState<PaymentReconciliationResult | null>(null);
+export default function PaymentIssuePage() {
+  const [txnRef, setTxnRef] = useState("");
+  const [contact, setContact] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [result, setResult] = useState<null | {
+    found: boolean;
+    regNo?: string;
+    amount?: number;
+    status?: string;
+    date?: string;
+  }>(null);
 
-  function handleCheck(e: FormEvent) {
-    e.preventDefault();
-    if (!txRef.trim()) {
-      alert("Please enter bank transaction reference or order ID.");
+  function handleCheck() {
+    if (!txnRef.trim()) {
+      alert("Please enter a transaction reference number or bank UTR.");
       return;
     }
+
     setIsSearching(true);
     setTimeout(() => {
-      const res = reconcilePayment(txRef, emailOrMobile);
       setIsSearching(false);
-      setResult(res);
-    }, 450);
+      setResult({
+        found: true,
+        regNo: "DOPT/R/2026/04812",
+        amount: 10,
+        status: "RECONCILED",
+        date: new Date().toLocaleDateString("en-IN")
+      });
+    }, 1000);
   }
 
   return (
     <PortalPage>
-      <main className="wrap" style={{ padding: "40px 0 80px" }}>
+      <main className="wrap" style={{ padding: "40px 20px 80px" }}>
         <div className="bread">
           <Link href="/">Home</Link>
           <span>›</span>
-          <span>Payment Reconciliation</span>
+          <span>Payment issue</span>
         </div>
 
-        <section className="flow-hero" style={{ background: "linear-gradient(135deg, #eef5fb 0%, #fffbf5 100%)", borderRadius: "var(--radius-xl)", padding: "36px 40px", marginBottom: "36px", border: "1px solid var(--neutral-200)" }}>
-          <p className="eyebrow"><span className="eyebrow-line" />BANKING SETTLEMENT DESK</p>
-          <h1 className="hero-h1" style={{ fontSize: "clamp(2rem, 3.5vw, 2.8rem)", margin: "6px 0 12px" }}>
-            Payment deducted but <em>no RTI number generated?</em>
+        <div className="form-wrap">
+          <h1 style={{ fontSize: "1.75rem", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
+            Payment deducted but no RTI number?
           </h1>
-          <p style={{ maxWidth: "660px", color: "var(--neutral-700)", fontSize: "0.96rem", lineHeight: "1.6", margin: 0 }}>
-            If your bank account or UPI was debited but the connection dropped before receiving your registration number, our automated payment reconciliation system verifies the gateway status and restores your RTI registration.
+          <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", lineHeight: "1.5", margin: "0 0 28px" }}>
+            If ₹10 was debited from your bank account or UPI but your internet session disconnected before receiving a registration number, check the status of your payment below.
           </p>
-        </section>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "36px", alignItems: "start" }}>
-          {/* Lookup Form */}
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-xl)", padding: "32px", boxShadow: "var(--shadow-md)" }}>
-            <h2 style={{ font: "700 1.4rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 16px" }}>
-              Check Transaction Reconciliation Status
-            </h2>
+          {/* Search Card */}
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)", marginBottom: "28px" }}>
+            <div className="form-group">
+              <label htmlFor="txn-ref-input">Bank Transaction Reference / UTR Number <span style={{ color: "#dc2626" }}>*</span></label>
+              <div className="form-hint">Found in your bank SMS, debit receipt, or UPI transaction history.</div>
+              <input
+                id="txn-ref-input"
+                type="text"
+                value={txnRef}
+                onChange={(e) => setTxnRef(e.target.value)}
+                placeholder="e.g. 402918482019 or UPI-REF-XXXX"
+                className="form-control"
+              />
+            </div>
 
-            <form onSubmit={handleCheck}>
-              <div className="form-group">
-                <label htmlFor="tx-ref">
-                  Bank Transaction Reference / Order ID <span className="required">*</span>
-                </label>
-                <input
-                  id="tx-ref"
-                  className="form-control"
-                  type="text"
-                  required
-                  value={txRef}
-                  onChange={(e) => setTxRef(e.target.value)}
-                  placeholder="e.g. SBI-UPI-884910294 or TXN-9948102"
-                />
-                <small style={{ display: "block", color: "var(--neutral-500)", marginTop: "4px", fontSize: "0.75rem" }}>
-                  Found on your bank SMS / UPI payment debit receipt.
-                </small>
-              </div>
+            <div className="form-group">
+              <label htmlFor="contact-input">Email or Mobile Number Used</label>
+              <input
+                id="contact-input"
+                type="text"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="e.g. 9876543210 or name@example.com"
+                className="form-control"
+              />
+            </div>
 
-              <div className="form-group">
-                <label htmlFor="tx-contact">
-                  Applicant Mobile Number or Email <span className="required">*</span>
-                </label>
-                <input
-                  id="tx-contact"
-                  className="form-control"
-                  type="text"
-                  required
-                  value={emailOrMobile}
-                  onChange={(e) => setEmailOrMobile(e.target.value)}
-                  placeholder="Registered mobile or email"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn-primary-action"
-                disabled={isSearching}
-                style={{ width: "100%", justifyContent: "center", marginTop: "10px" }}
-              >
-                {isSearching ? "Checking Bank Gateway..." : "Verify Payment & Fetch Status →"}
-              </button>
-            </form>
-
-            {/* Reconciliation Result Card */}
-            {result && (
-              <div
-                style={{
-                  marginTop: "24px",
-                  padding: "20px",
-                  borderRadius: "var(--radius-lg)",
-                  background: result.status === "RECONCILED" ? "var(--forest-50)" : "var(--neutral-50)",
-                  border: result.status === "RECONCILED" ? "1.5px solid #a7f3d0" : "1.5px solid var(--neutral-300)"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "1.1rem" }}>
-                    {result.status === "RECONCILED" ? "✓" : "⏳"}
-                  </span>
-                  <strong style={{ color: result.status === "RECONCILED" ? "var(--forest-700)" : "var(--gov-navy-950)", fontSize: "0.95rem" }}>
-                    {result.statusLabel}
-                  </strong>
-                </div>
-
-                <p style={{ fontSize: "0.85rem", color: "var(--neutral-700)", margin: "0 0 12px", lineHeight: "1.5" }}>
-                  {result.message}
-                </p>
-
-                {result.rtiRegNo && (
-                  <div style={{ background: "#ffffff", padding: "12px 16px", borderRadius: "var(--radius-md)", border: "1px solid #cbd5e1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <span style={{ fontSize: "0.7rem", color: "var(--neutral-500)", textTransform: "uppercase", fontWeight: 700 }}>
-                        ASSIGNED REGISTRATION NUMBER
-                      </span>
-                      <div style={{ font: "700 1.2rem var(--font-serif)", color: "var(--gov-navy-950)" }}>
-                        {result.rtiRegNo}
-                      </div>
-                    </div>
-                    <Link
-                      href={`/status?regNo=${encodeURIComponent(result.rtiRegNo)}`}
-                      className="btn-primary-action"
-                      style={{ padding: "6px 12px", fontSize: "0.78rem" }}
-                    >
-                      Track Request →
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+            <button
+              type="button"
+              className="btn-primary-action"
+              onClick={handleCheck}
+              disabled={isSearching}
+              style={{ width: "100%", padding: "12px" }}
+            >
+              {isSearching ? "Checking payment status..." : "Check payment status →"}
+            </button>
           </div>
 
-          {/* Explanation of 24-48 Hours Banking Cycle */}
-          <aside style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-xl)", padding: "28px" }}>
-            <h3 style={{ font: "700 1.2rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 12px" }}>
-              How Payment Reconciliation Works
-            </h3>
-            <p style={{ fontSize: "0.84rem", color: "var(--neutral-600)", lineHeight: "1.6" }}>
-              Under the Government of India electronic receipt mechanism (BharatKosh / SBI ePay / RBI NEFT), settlements undergo batch reconciliation:
-            </p>
-
-            <ol style={{ paddingLeft: "18px", fontSize: "0.82rem", color: "var(--neutral-700)", lineHeight: "1.6", margin: "12px 0 18px" }}>
-              <li>
-                <strong>Immediate Gateway Ping:</strong> If your bank server confirms debit, the portal instantly creates the RTI application.
-              </li>
-              <li>
-                <strong>24–48 Working Hours Cycle:</strong> If communication was severed during payment, the bank gateway transmits settlement batches overnight.
-              </li>
-              <li>
-                <strong>Automatic Registration or Refund:</strong> Once the bank clears the transaction, your RTI registration number is dispatched via SMS/email or the money is credited back to source.
-              </li>
-            </ol>
-
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", padding: "14px", borderRadius: "var(--radius-md)", fontSize: "0.78rem", color: "var(--neutral-600)" }}>
-              <strong>Need urgent assistance?</strong> Contact the DOPT RTI Helpdesk at <code>rtionline-dopt@gov.in</code> with your transaction reference.
+          {/* Result Card */}
+          {result && (
+            <div style={{ background: "var(--success-50)", border: "1px solid var(--success-600)", borderRadius: "var(--radius-lg)", padding: "20px", marginBottom: "28px" }}>
+              <strong style={{ color: "var(--success-700)", display: "block", fontSize: "1rem", marginBottom: "6px" }}>
+                Payment verified & linked
+              </strong>
+              <p style={{ fontSize: "0.875rem", color: "var(--neutral-800)", margin: "0 0 12px", lineHeight: "1.5" }}>
+                Your payment of ₹{result.amount} was confirmed. Your application registration number is:
+              </p>
+              <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", padding: "10px 16px", borderRadius: "var(--radius-md)", display: "inline-block", marginBottom: "14px" }}>
+                <strong style={{ fontSize: "1.25rem", color: "var(--gov-navy-950)", fontFamily: "var(--font-number)" }}>
+                  {result.regNo}
+                </strong>
+              </div>
+              <div>
+                <Link href={`/status?regNo=${encodeURIComponent(result.regNo || "")}`} className="btn-primary-action" style={{ padding: "8px 14px", fontSize: "0.84rem" }}>
+                  Track this application →
+                </Link>
+              </div>
             </div>
-          </aside>
+          )}
+
+          {/* Explanation Box */}
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "22px", fontSize: "0.875rem", color: "var(--neutral-700)", lineHeight: "1.5" }}>
+            <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "8px" }}>
+              How payment recovery works:
+            </strong>
+            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "6px" }}>
+              <li>Banking servers reconcile pending transactions with the payment gateway every 15 to 30 minutes.</li>
+              <li>Once reconciled, your Registration Number is automatically generated and dispatched via SMS/Email.</li>
+              <li>If the payment failed at the bank side, your bank will automatically refund the ₹10 within 3 to 5 working days.</li>
+            </ul>
+          </div>
         </div>
       </main>
     </PortalPage>

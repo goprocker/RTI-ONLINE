@@ -1,433 +1,230 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PortalPage } from "../../components/portal-shell";
 import { useAuth } from "../../lib/auth-context";
-import { RTIApplication } from "../../types/rti";
 
 export default function CitizenDashboardPage() {
-  const router = useRouter();
-  const { user, applications, payAdditionalFee, uploadClarificationDoc, markSatisfaction } = useAuth();
-
-  const [selectedApp, setSelectedApp] = useState<RTIApplication | null>(null);
-  const [docUploadModalAppId, setDocUploadModalAppId] = useState<string | null>(null);
-  const [docFileToUpload, setDocFileToUpload] = useState("Candidate_Admit_Card_2026.pdf");
-
-  // Status Filter tabs
-  const [activeFilter, setActiveFilter] = useState<"ALL" | "PROCESSING" | "ACTION" | "CLOSED">("ALL");
-
-  const totalCount = applications.length;
-  const processingCount = applications.filter((a) => a.status === "UNDER_PROCESS" || a.status === "TRANSFERRED" || a.status === "SUBMITTED").length;
-  const actionCount = applications.filter((a) => a.status === "ACTION_DOC_REQUIRED" || a.status === "ADDITIONAL_FEE_REQUIRED" || a.status === "RESPONSE_ISSUED").length;
-  const closedCount = applications.filter((a) => a.status === "DISPOSED_SATISFIED" || a.status === "FIRST_APPEAL_FILED").length;
-
-  const filteredApps = applications.filter((app) => {
-    if (activeFilter === "PROCESSING") return app.status === "UNDER_PROCESS" || app.status === "TRANSFERRED" || app.status === "SUBMITTED";
-    if (activeFilter === "ACTION") return app.status === "ACTION_DOC_REQUIRED" || app.status === "ADDITIONAL_FEE_REQUIRED" || app.status === "RESPONSE_ISSUED";
-    if (activeFilter === "CLOSED") return app.status === "DISPOSED_SATISFIED" || app.status === "FIRST_APPEAL_FILED";
-    return true;
-  });
+  const { user, applications, payAdditionalFee, uploadClarificationDoc } = useAuth();
+  const [activeModalAppId, setActiveModalAppId] = useState<string | null>(null);
+  const [docUploadAppId, setDocUploadAppId] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string>("");
 
   return (
     <PortalPage>
-      <main className="wrap" style={{ padding: "36px 0 80px" }}>
-        {/* Header with Verified Citizen Profile */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "28px" }}>
+      <main className="wrap" style={{ padding: "40px 20px 80px" }}>
+        <div className="bread">
+          <Link href="/">Home</Link>
+          <span>›</span>
+          <span>My requests</span>
+        </div>
+
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "28px", borderBottom: "1px solid var(--neutral-200)", paddingBottom: "20px" }}>
           <div>
-            <p className="eyebrow" style={{ marginBottom: "4px" }}>
-              <span className="eyebrow-line" />
-              CITIZEN UNIFIED PORTAL · ACTIVE SESSIONS
-            </p>
-            <h1 style={{ font: "700 2.2rem var(--font-serif)", color: "var(--gov-navy-950)", margin: 0 }}>
-              Good morning, {user ? user.name.split(" ")[0] : "Rajesh"} 👋
+            <h1 style={{ fontSize: "1.75rem", color: "var(--gov-navy-950)", margin: "0 0 4px" }}>
+              Your requests
             </h1>
-            <p style={{ margin: "4px 0 0", color: "var(--neutral-600)", fontSize: "0.92rem" }}>
-              Registered Citizen ID: <strong>{user?.id || "CITIZEN-9842"}</strong> · Karnataka Jurisdiction
+            <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", margin: 0 }}>
+              Showing {applications.length} {applications.length === 1 ? "application" : "applications"} filed under your account ({user?.email || "Citizen"}).
             </p>
           </div>
 
-          <Link href="/request/eligibility" className="btn-primary-action" style={{ padding: "12px 24px" }}>
-            + File a New RTI Request
+          <Link href="/request/eligibility" className="btn-primary-action" style={{ padding: "8px 16px", fontSize: "0.875rem" }}>
+            + File a new RTI
           </Link>
         </div>
 
-        {/* 4 Metric Stats Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px", marginBottom: "32px" }}>
-          <div
-            onClick={() => setActiveFilter("ALL")}
-            style={{
-              background: activeFilter === "ALL" ? "var(--gov-blue-50)" : "#ffffff",
-              border: activeFilter === "ALL" ? "2px solid var(--gov-blue-600)" : "1px solid var(--neutral-200)",
-              borderRadius: "var(--radius-lg)",
-              padding: "18px 20px",
-              cursor: "pointer",
-              boxShadow: "var(--shadow-sm)"
-            }}
-          >
-            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--neutral-500)", textTransform: "uppercase" }}>TOTAL APPLICATIONS</span>
-            <div style={{ font: "700 2rem var(--font-number)", color: "var(--gov-navy-950)", margin: "4px 0 0" }}>{totalCount}</div>
-          </div>
-
-          <div
-            onClick={() => setActiveFilter("PROCESSING")}
-            style={{
-              background: activeFilter === "PROCESSING" ? "var(--gov-blue-50)" : "#ffffff",
-              border: activeFilter === "PROCESSING" ? "2px solid var(--gov-blue-600)" : "1px solid var(--neutral-200)",
-              borderRadius: "var(--radius-lg)",
-              padding: "18px 20px",
-              cursor: "pointer",
-              boxShadow: "var(--shadow-sm)"
-            }}
-          >
-            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--gov-blue-600)", textTransform: "uppercase" }}>UNDER PROCESSING</span>
-            <div style={{ font: "700 2rem var(--font-number)", color: "var(--gov-blue-600)", margin: "4px 0 0" }}>{processingCount}</div>
-          </div>
-
-          <div
-            onClick={() => setActiveFilter("ACTION")}
-            style={{
-              background: activeFilter === "ACTION" ? "#fffbeb" : "#ffffff",
-              border: activeFilter === "ACTION" ? "2px solid var(--amber-600)" : "1px solid var(--neutral-200)",
-              borderRadius: "var(--radius-lg)",
-              padding: "18px 20px",
-              cursor: "pointer",
-              boxShadow: "var(--shadow-sm)"
-            }}
-          >
-            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--amber-600)", textTransform: "uppercase" }}>ACTION REQUIRED</span>
-            <div style={{ font: "700 2rem var(--font-number)", color: "var(--amber-600)", margin: "4px 0 0" }}>{actionCount}</div>
-          </div>
-
-          <div
-            onClick={() => setActiveFilter("CLOSED")}
-            style={{
-              background: activeFilter === "CLOSED" ? "var(--forest-50)" : "#ffffff",
-              border: activeFilter === "CLOSED" ? "2px solid var(--forest-600)" : "1px solid var(--neutral-200)",
-              borderRadius: "var(--radius-lg)",
-              padding: "18px 20px",
-              cursor: "pointer",
-              boxShadow: "var(--shadow-sm)"
-            }}
-          >
-            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--forest-600)", textTransform: "uppercase" }}>CLOSED / APPEALED</span>
-            <div style={{ font: "700 2rem var(--font-number)", color: "var(--forest-600)", margin: "4px 0 0" }}>{closedCount}</div>
-          </div>
-        </div>
-
-        {/* Section Title */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-          <h2 style={{ font: "700 1.4rem var(--font-serif)", color: "var(--gov-navy-950)", margin: 0 }}>
-            My Applications ({filteredApps.length})
-          </h2>
-          <span style={{ fontSize: "0.82rem", color: "var(--neutral-500)" }}>
-            Showing: {activeFilter} applications
-          </span>
-        </div>
-
-        {/* Applications List */}
-        <div style={{ display: "grid", gap: "18px" }}>
-          {filteredApps.map((app) => (
+        {/* List of Applications (Case-focused cards, no corporate charts) */}
+        <div style={{ display: "grid", gap: "20px" }}>
+          {applications.map((app) => (
             <div
               key={app.id}
               style={{
                 background: "#ffffff",
-                border: "1.5px solid var(--neutral-200)",
-                borderRadius: "var(--radius-xl)",
+                border: "1px solid var(--neutral-200)",
+                borderRadius: "var(--radius-lg)",
                 padding: "24px",
-                boxShadow: "var(--shadow-md)"
+                boxShadow: "var(--shadow-sm)"
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
+              {/* Top Meta Line */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "10px" }}>
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ font: "700 1.15rem var(--font-number)", color: "var(--gov-navy-950)", letterSpacing: "0.02em" }}>
-                      {app.regNo}
-                    </span>
-                    <span style={{ fontSize: "0.76rem", color: "var(--neutral-500)" }}>
-                      Filed on {app.filingDate}
-                    </span>
-                  </div>
-                  <h3 style={{ font: "700 1.1rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "4px 0 2px" }}>
-                    {app.subject}
-                  </h3>
-                  <div style={{ fontSize: "0.82rem", color: "var(--neutral-600)" }}>
-                    {app.publicAuthority} ({app.ministry})
+                  <span style={{ fontSize: "0.8125rem", color: "var(--neutral-500)", textTransform: "uppercase" }}>
+                    Registration Number
+                  </span>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--gov-navy-950)", fontFamily: "var(--font-number)" }}>
+                    {app.regNo}
                   </div>
                 </div>
 
-                {/* Status Pill */}
-                <div>
-                  {app.status === "UNDER_PROCESS" && (
-                    <span style={{ background: "var(--gov-blue-50)", color: "var(--gov-blue-600)", border: "1px solid #bfdbfe", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ● UNDER PROCESSING
-                    </span>
-                  )}
-                  {app.status === "TRANSFERRED" && (
-                    <span style={{ background: "var(--gov-blue-100)", color: "var(--gov-blue-800)", border: "1px solid #93c5fd", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ↗ TRANSFERRED (SEC 6(3))
-                    </span>
-                  )}
-                  {app.status === "ACTION_DOC_REQUIRED" && (
-                    <span style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ⚠ DOCUMENT REQUESTED
-                    </span>
-                  )}
-                  {app.status === "ADDITIONAL_FEE_REQUIRED" && (
-                    <span style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fca5a5", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ⚠ ADDITIONAL FEE REQUIRED
-                    </span>
-                  )}
-                  {app.status === "RESPONSE_ISSUED" && (
-                    <span style={{ background: "var(--forest-100)", color: "var(--forest-700)", border: "1px solid #a7f3d0", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ✓ RESPONSE RECEIVED
-                    </span>
-                  )}
-                  {app.status === "DISPOSED_SATISFIED" && (
-                    <span style={{ background: "var(--forest-50)", color: "var(--forest-700)", border: "1px solid var(--forest-600)", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ✓ CLOSED (SATISFIED)
-                    </span>
-                  )}
-                  {app.status === "FIRST_APPEAL_FILED" && (
-                    <span style={{ background: "#e0e7ff", color: "#3730a3", border: "1px solid #c7d2fe", padding: "4px 12px", borderRadius: "var(--radius-full)", fontSize: "0.75rem", fontWeight: 800 }}>
-                      ⚖️ FIRST APPEAL FILED
-                    </span>
-                  )}
+                <div style={{ textAlign: "right" }}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      padding: "3px 10px",
+                      borderRadius: "var(--radius-full)",
+                      background:
+                        app.status === "RESPONSE_ISSUED" || app.status === "DISPOSED_SATISFIED"
+                          ? "var(--success-50)"
+                          : app.status === "ACTION_DOC_REQUIRED" || app.status === "ADDITIONAL_FEE_REQUIRED"
+                          ? "var(--warning-50)"
+                          : "var(--gov-blue-50)",
+                      color:
+                        app.status === "RESPONSE_ISSUED" || app.status === "DISPOSED_SATISFIED"
+                          ? "var(--success-700)"
+                          : app.status === "ACTION_DOC_REQUIRED" || app.status === "ADDITIONAL_FEE_REQUIRED"
+                          ? "var(--warning-700)"
+                          : "var(--gov-blue-600)",
+                      border: "1px solid currentColor"
+                    }}
+                  >
+                    {app.statusLabel}
+                  </span>
+                  <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)", marginTop: "4px" }}>
+                    Expected by: <strong>{app.expectedDate}</strong>
+                  </div>
                 </div>
               </div>
 
-              {/* SCREEN 20: IF RTI IS TRANSFERRED */}
-              {app.status === "TRANSFERRED" && (
-                <div style={{ background: "var(--gov-blue-50)", border: "1px solid #bfdbfe", borderRadius: "var(--radius-md)", padding: "14px 16px", margin: "14px 0", fontSize: "0.84rem" }}>
-                  <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "2px" }}>
-                    ↗ Your RTI was transferred
-                  </strong>
-                  <p style={{ margin: "0 0 6px", color: "var(--neutral-700)", lineHeight: "1.5" }}>
-                    Your request was transferred under Section 6(3) because another Public Authority holds the requested information.
-                  </p>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center", fontSize: "0.8rem", color: "var(--gov-navy-900)" }}>
-                    <span><strong>From:</strong> {app.transferFrom}</span>
-                    <span>→</span>
-                    <span><strong>To:</strong> {app.transferTo}</span>
-                  </div>
-                  <div style={{ marginTop: "6px", fontSize: "0.76rem", color: "var(--forest-600)", fontWeight: 700 }}>
-                    ✓ No action is currently required from you. The 30-day statutory window applies from date of transfer receipt.
-                  </div>
-                </div>
-              )}
+              {/* Subject & Authority */}
+              <h2 style={{ fontSize: "1.125rem", color: "var(--gov-navy-950)", margin: "0 0 4px" }}>
+                {app.subject}
+              </h2>
+              <div style={{ fontSize: "0.875rem", color: "var(--neutral-600)", marginBottom: "14px" }}>
+                {app.department} · {app.ministry}
+              </div>
 
-              {/* SCREEN 21: ADDITIONAL DOCUMENT REQUESTED */}
-              {app.status === "ACTION_DOC_REQUIRED" && (
-                <div style={{ background: "#fffbeb", border: "1.5px solid #fcd34d", borderRadius: "var(--radius-md)", padding: "14px 16px", margin: "14px 0" }}>
-                  <strong style={{ color: "#92400e", display: "block", marginBottom: "4px" }}>
-                    ⚠ ACTION REQUIRED: Supporting Document Requested by CPIO
-                  </strong>
-                  <p style={{ margin: "0 0 10px", fontSize: "0.84rem", color: "#78350f" }}>
-                    Reason: <em>&quot;{app.docRequestReason}&quot;</em>
-                  </p>
-                  <button
-                    type="button"
-                    className="btn-primary-action"
-                    onClick={() => setDocUploadModalAppId(app.id)}
-                    style={{ padding: "6px 14px", fontSize: "0.8rem" }}
-                  >
-                    + Upload Requested Document
-                  </button>
-                </div>
-              )}
+              {/* Current Status Explanation */}
+              <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "12px 14px", fontSize: "0.875rem", color: "var(--neutral-700)", lineHeight: "1.5", marginBottom: "16px" }}>
+                <strong>Latest update:</strong> {app.currentStageText}
+              </div>
 
-              {/* SCREEN 22: ADDITIONAL FEE REQUESTED */}
+              {/* Action Required Banners */}
               {app.status === "ADDITIONAL_FEE_REQUIRED" && (
-                <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: "var(--radius-md)", padding: "14px 16px", margin: "14px 0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                <div className="gov-alert gov-alert-warning" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
                   <div>
-                    <strong style={{ color: "#991b1b", display: "block", marginBottom: "2px" }}>
-                      ⚠ PAYMENT REQUIRED: Additional Fee ₹{app.additionalFeeAmount}
-                    </strong>
-                    <p style={{ margin: 0, fontSize: "0.84rem", color: "#7f1d1d" }}>
-                      Reason: Photocopy charges for {app.photocopyPages} pages (@ ₹2 per page under RTI Rules, 2012).
-                    </p>
+                    <strong>Action required:</strong> Additional photocopy fee of ₹{app.additionalFeeRequired?.amount} demanded for {app.additionalFeeRequired?.pages} pages (@ ₹2/page).
                   </div>
                   <button
                     type="button"
                     className="btn-primary-action"
                     onClick={() => {
-                      payAdditionalFee(app.id, app.additionalFeeAmount || 24);
-                      alert(`Additional fee of ₹${app.additionalFeeAmount} settled. CPIO notified to dispatch certified copies.`);
+                      payAdditionalFee(app.id);
+                      alert(`Payment of ₹${app.additionalFeeRequired?.amount} settled successfully. CPIO notified.`);
                     }}
-                    style={{ background: "#dc2626", borderColor: "#b91c1c", padding: "8px 18px", fontSize: "0.82rem" }}
+                    style={{ padding: "6px 14px", fontSize: "0.8125rem" }}
                   >
-                    Pay ₹{app.additionalFeeAmount} Now →
+                    Pay ₹{app.additionalFeeRequired?.amount} online →
                   </button>
                 </div>
               )}
 
-              {/* SCREEN 23 & 24: RESPONSE RECEIVED & SATISFACTION QUESTION */}
-              {app.status === "RESPONSE_ISSUED" && (
-                <div style={{ background: "var(--forest-50)", border: "1.5px solid #a7f3d0", borderRadius: "var(--radius-md)", padding: "16px", margin: "14px 0" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "8px" }}>
-                    <div>
-                      <strong style={{ color: "var(--forest-700)", fontSize: "0.95rem", display: "block" }}>
-                        ✓ RESPONSE RECEIVED
-                      </strong>
-                      <p style={{ margin: "2px 0 0", fontSize: "0.84rem", color: "var(--neutral-700)" }}>
-                        The Public Authority has furnished a statutory response order to your RTI request.
-                      </p>
-                    </div>
+              {app.status === "ACTION_DOC_REQUIRED" && (
+                <div className="gov-alert gov-alert-warning" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <div>
+                    <strong>Action required:</strong> {app.clarificationRequest?.reason}
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-primary-action"
+                    onClick={() => setDocUploadAppId(app.id)}
+                    style={{ padding: "6px 14px", fontSize: "0.8125rem" }}
+                  >
+                    Upload document →
+                  </button>
+                </div>
+              )}
+
+              {/* Response Available */}
+              {app.responseOrder && (
+                <div className="gov-alert gov-alert-success" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <div>
+                    <strong>Official CPIO Response Order issued:</strong> {app.responseOrder.summary}
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
                     <button
                       type="button"
                       className="btn-secondary-action"
-                      onClick={() => alert(`Downloading official CPIO reply for ${app.regNo} (PDF)...`)}
-                      style={{ padding: "6px 12px", fontSize: "0.8rem", color: "var(--forest-700)" }}
+                      onClick={() => alert(`Downloading official certified response: ${app.responseOrder?.pdfUrl}...`)}
+                      style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
                     >
-                      📄 Download Official Reply (PDF)
+                      Download Response PDF
                     </button>
-                  </div>
-
-                  {/* Satisfaction Decision Gate */}
-                  <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #d1fae5" }}>
-                    <span style={{ fontSize: "0.84rem", fontWeight: 700, color: "var(--gov-navy-950)", display: "block", marginBottom: "8px" }}>
-                      Did the response resolve your RTI request?
-                    </span>
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        className="btn-primary-action"
-                        onClick={() => {
-                          markSatisfaction(app.id, true);
-                          alert("RTI Completed! Your application and response will remain in your history.");
-                        }}
-                        style={{ background: "var(--forest-600)", borderColor: "var(--forest-700)", padding: "6px 14px", fontSize: "0.8rem" }}
-                      >
-                        ✓ Yes, I&apos;m satisfied (Close Case)
-                      </button>
-
-                      <Link
-                        href={`/appeal/new?regNo=${encodeURIComponent(app.regNo)}`}
-                        className="btn-secondary-action"
-                        style={{ padding: "6px 14px", fontSize: "0.8rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                      >
-                        ✕ No, I want to appeal (First Appeal) →
-                      </Link>
-                    </div>
+                    <Link
+                      href={`/appeal/new?regNo=${encodeURIComponent(app.regNo)}`}
+                      className="btn-secondary-action"
+                      style={{ padding: "6px 12px", fontSize: "0.8125rem", color: "var(--gov-blue-600)" }}
+                    >
+                      Appeal decision →
+                    </Link>
                   </div>
                 </div>
               )}
 
-              {/* Statutory Response Countdown Bar */}
-              {app.remainingDays > 0 && app.status !== "DISPOSED_SATISFIED" && (
-                <div style={{ margin: "14px 0 10px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "var(--neutral-600)", marginBottom: "4px" }}>
-                    <span>Statutory 30-Day Window: <strong>{app.remainingDays} days remaining</strong></span>
-                    <span>Expected by {app.expectedDate}</span>
-                  </div>
-                  <div style={{ height: "6px", background: "var(--neutral-200)", borderRadius: "var(--radius-full)", overflow: "hidden" }}>
-                    <div
-                      style={{
-                        width: `${Math.max(15, ((30 - app.remainingDays) / 30) * 100)}%`,
-                        height: "100%",
-                        background: "linear-gradient(90deg, var(--gov-blue-600) 0%, var(--saffron-500) 100%)"
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Action Bar */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--neutral-100)" }}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedApp(selectedApp?.id === app.id ? null : app)}
-                  style={{ background: "none", border: 0, color: "var(--gov-blue-600)", fontWeight: 700, fontSize: "0.84rem", cursor: "pointer" }}
-                >
-                  {selectedApp?.id === app.id ? "▲ Hide Details & Audit Trail" : "▼ View Details & Audit Trail →"}
-                </button>
-
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <Link
-                    href={`/status?regNo=${encodeURIComponent(app.regNo)}`}
-                    style={{ fontSize: "0.8rem", color: "var(--neutral-600)", textDecoration: "none" }}
-                  >
-                    Public Tracker Link ↗
-                  </Link>
-                </div>
+              {/* Bottom Details Footer */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--neutral-100)", paddingTop: "12px", marginTop: "12px", fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
+                <span>Filing date: {app.filingDate} · Payment ref: {app.paymentRef}</span>
+                <Link href={`/status?regNo=${encodeURIComponent(app.regNo)}`} style={{ fontWeight: 600 }}>
+                  View full timeline →
+                </Link>
               </div>
-
-              {/* SCREEN 19: EXPANDED AUDIT TRAIL */}
-              {selectedApp?.id === app.id && (
-                <div style={{ marginTop: "18px", paddingTop: "18px", borderTop: "1px solid var(--neutral-200)", animation: "fadeIn 0.2s ease-in" }}>
-                  <h4 style={{ font: "700 1.05rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 12px" }}>
-                    Application Timeline & Audit Trail
-                  </h4>
-
-                  <div className="timeline-trail" style={{ paddingLeft: "16px" }}>
-                    {app.timeline.map((ev, idx) => (
-                      <div key={idx} className={`timeline-node ${ev.completed ? "node-done" : ev.current ? "node-active" : ""}`} style={{ marginBottom: "14px" }}>
-                        <div style={{ fontSize: "0.86rem", fontWeight: 700, color: ev.completed || ev.current ? "var(--gov-navy-950)" : "var(--neutral-400)" }}>
-                          {ev.title}
-                        </div>
-                        <div style={{ fontSize: "0.78rem", color: "var(--neutral-600)", margin: "2px 0" }}>
-                          {ev.description}
-                        </div>
-                        <div style={{ fontSize: "0.72rem", color: "var(--neutral-400)" }}>
-                          {ev.date}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ background: "var(--neutral-50)", padding: "12px 16px", borderRadius: "var(--radius-md)", fontSize: "0.82rem", marginTop: "14px" }}>
-                    <strong>Original RTI Text:</strong>
-                    <p style={{ margin: "4px 0 0", color: "var(--neutral-700)", whiteSpace: "pre-wrap" }}>
-                      {app.queryText}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
+
+          {applications.length === 0 && (
+            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "40px", textAlign: "center" }}>
+              <h2 style={{ fontSize: "1.25rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+                No applications filed yet
+              </h2>
+              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
+                When you submit an RTI request, its progress and official response orders will appear here.
+              </p>
+              <Link href="/request/eligibility" className="btn-primary-action">
+                File an RTI request →
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* MODAL: UPLOAD REQUESTED CLARIFICATION DOCUMENT */}
-        {docUploadModalAppId && (
+        {/* Upload Document Modal */}
+        {docUploadAppId && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "grid", placeItems: "center", zIndex: 1000 }}>
-            <div style={{ background: "#ffffff", borderRadius: "var(--radius-xl)", padding: "32px", maxWidth: "500px", width: "90%", boxShadow: "var(--shadow-xl)" }}>
-              <h3 style={{ font: "700 1.3rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
-                Upload Requested Document
+            <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "28px", maxWidth: "480px", width: "90%", boxShadow: "var(--shadow-lg)" }}>
+              <h3 style={{ fontSize: "1.25rem", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
+                Upload requested document
               </h3>
-              <p style={{ fontSize: "0.86rem", color: "var(--neutral-600)", margin: "0 0 16px" }}>
-                Upload the requested identity or verification document to allow the CPIO to continue processing your RTI.
+              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 16px" }}>
+                Please select the PDF document requested by the CPIO.
               </p>
 
               <div className="form-group">
-                <label htmlFor="doc-file-input">Select Document (PDF / JPEG)</label>
                 <input
-                  id="doc-file-input"
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => setSelectedFileName(e.target.files?.[0]?.name || "clarification_document.pdf")}
                   className="form-control"
-                  type="text"
-                  value={docFileToUpload}
-                  onChange={(e) => setDocFileToUpload(e.target.value)}
                 />
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-                <button
-                  type="button"
-                  className="btn-secondary-action"
-                  onClick={() => setDocUploadModalAppId(null)}
-                >
+                <button type="button" className="btn-secondary-action" onClick={() => setDocUploadAppId(null)}>
                   Cancel
                 </button>
                 <button
                   type="button"
                   className="btn-primary-action"
                   onClick={() => {
-                    uploadClarificationDoc(docUploadModalAppId, docFileToUpload);
-                    setDocUploadModalAppId(null);
-                    alert("Document successfully submitted to CPIO. RTI processing resumed.");
+                    uploadClarificationDoc(docUploadAppId, selectedFileName || "clarification_document.pdf");
+                    setDocUploadAppId(null);
+                    alert("Document transmitted to CPIO successfully.");
                   }}
                 >
-                  Submit Document →
+                  Submit document →
                 </button>
               </div>
             </div>
