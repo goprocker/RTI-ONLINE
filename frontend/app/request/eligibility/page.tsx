@@ -1,234 +1,265 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { PortalPage } from "../../../components/portal-shell";
-import { stateRtiPortalsDatabase } from "../../../lib/state-portals";
+import { allIndiaStatePortals } from "../../../lib/state-portals";
 
-function EligibilityCheckerContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("query") || "";
-
-  const [isCitizen, setIsCitizen] = useState<boolean | null>(true);
-  const [jurisdiction, setJurisdiction] = useState<"CENTRAL" | "STATE" | "NOT_SURE">("CENTRAL");
+export default function EligibilityCheckPage() {
+  const [isIndianCitizen, setIsIndianCitizen] = useState<boolean | null>(true);
+  const [govLevel, setGovLevel] = useState<"CENTRAL" | "STATE" | "NOT_SURE">("CENTRAL");
   const [selectedState, setSelectedState] = useState<string>("Maharashtra");
-  const [issueQuery, setIssueQuery] = useState(initialQuery);
+  const [canIRtiText, setCanIRtiText] = useState("");
+
+  const stateInfo = allIndiaStatePortals.find((s) => s.state === selectedState);
 
   const isComplaint =
-    issueQuery.toLowerCase().includes("money") ||
-    issueQuery.toLowerCase().includes("refund") ||
-    issueQuery.toLowerCase().includes("release") ||
-    issueQuery.toLowerCase().includes("bribe") ||
-    issueQuery.toLowerCase().includes("harass") ||
-    issueQuery.toLowerCase().includes("action against");
+    canIRtiText.toLowerCase().includes("money") ||
+    canIRtiText.toLowerCase().includes("pension release") ||
+    canIRtiText.toLowerCase().includes("harass") ||
+    canIRtiText.toLowerCase().includes("bribe") ||
+    canIRtiText.toLowerCase().includes("fire officer");
 
-  function handleContinue() {
-    if (isCitizen === false) {
-      alert("Under Section 3 of the RTI Act, only citizens of India are eligible to file RTI requests.");
-      return;
-    }
-
-    if (jurisdiction === "STATE") {
-      return;
-    }
-
-    router.push(`/request/new${issueQuery ? `?query=${encodeURIComponent(issueQuery)}` : ""}`);
-  }
-
-  const matchedState = stateRtiPortalsDatabase.find((s) => s.stateName === selectedState);
-
-  return (
-    <main className="wrap" style={{ padding: "40px 20px 80px" }}>
-      <div className="bread">
-        <Link href="/">Home</Link>
-        <span>›</span>
-        <span>Before you start</span>
-      </div>
-
-      <div className="form-wrap">
-        <h1 style={{ fontSize: "1.75rem", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
-          Before you start
-        </h1>
-        <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", lineHeight: "1.5", margin: "0 0 28px" }}>
-          Check if your request can be filed through the Central RTI portal.
-        </p>
-
-        {/* Question 1: Citizenship */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px", marginBottom: "20px" }}>
-          <label style={{ display: "block", fontSize: "0.9375rem", fontWeight: 600, color: "var(--gov-navy-950)", marginBottom: "10px" }}>
-            1. Are you a citizen of India?
-          </label>
-          <div style={{ display: "flex", gap: "20px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9375rem", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="citizenship"
-                checked={isCitizen === true}
-                onChange={() => setIsCitizen(true)}
-              />
-              Yes
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9375rem", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="citizenship"
-                checked={isCitizen === false}
-                onChange={() => setIsCitizen(false)}
-              />
-              No
-            </label>
-          </div>
-          {isCitizen === false && (
-            <div className="gov-alert gov-alert-danger" style={{ marginTop: "12px" }}>
-              Section 3 of the RTI Act, 2005 confers the Right to Information specifically to Citizens of India.
-            </div>
-          )}
-        </div>
-
-        {/* Question 2: Jurisdiction */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px", marginBottom: "20px" }}>
-          <label style={{ display: "block", fontSize: "0.9375rem", fontWeight: 600, color: "var(--gov-navy-950)", marginBottom: "10px" }}>
-            2. Who holds the information you need?
-          </label>
-          <div style={{ display: "grid", gap: "10px" }}>
-            <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "0.9375rem", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="jurisdiction"
-                checked={jurisdiction === "CENTRAL"}
-                onChange={() => setJurisdiction("CENTRAL")}
-                style={{ marginTop: "3px" }}
-              />
-              <div>
-                <strong>Central Government</strong>
-                <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
-                  Passports, EPFO, Railways, Nationalised Banks, Income Tax, CBSE, UPSC, Defence, Central Universities.
-                </div>
-              </div>
-            </label>
-
-            <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "0.9375rem", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="jurisdiction"
-                checked={jurisdiction === "STATE"}
-                onChange={() => setJurisdiction("STATE")}
-                style={{ marginTop: "3px" }}
-              />
-              <div>
-                <strong>State Government / Local Authority</strong>
-                <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
-                  State Police, Municipal Corporations, District Collectors, Ration Cards, Land Revenue, State Electricity Boards.
-                </div>
-              </div>
-            </label>
-
-            <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "0.9375rem", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="jurisdiction"
-                checked={jurisdiction === "NOT_SURE"}
-                onChange={() => setJurisdiction("NOT_SURE")}
-                style={{ marginTop: "3px" }}
-              />
-              <div>
-                <strong>I&apos;m not sure</strong>
-                <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
-                  We will help you identify the authority in the next step.
-                </div>
-              </div>
-            </label>
-          </div>
-
-          {/* State Redirection Box */}
-          {jurisdiction === "STATE" && (
-            <div style={{ marginTop: "16px", padding: "16px", background: "var(--neutral-50)", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)" }}>
-              <strong style={{ fontSize: "0.875rem", color: "var(--gov-navy-950)", display: "block", marginBottom: "6px" }}>
-                State RTIs cannot be filed on the Central portal
-              </strong>
-              <p style={{ fontSize: "0.8125rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                Select your state to visit their designated state portal or generate a postal application:
-              </p>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
-                <select
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
-                  className="form-control"
-                  style={{ flex: "1 1 200px" }}
-                >
-                  {stateRtiPortalsDatabase.map((s) => (
-                    <option key={s.stateName} value={s.stateName}>
-                      {s.stateName}
-                    </option>
-                  ))}
-                </select>
-                {matchedState?.hasOnlinePortal && (
-                  <a
-                    href={matchedState.portalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary-action"
-                    style={{ padding: "8px 14px", fontSize: "0.875rem" }}
-                  >
-                    Go to State Portal ↗
-                  </a>
-                )}
-              </div>
-              <Link href="/offline" style={{ fontSize: "0.8125rem", color: "var(--gov-blue-600)" }}>
-                Or prepare an offline RTI letter for postal submission →
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* "Can I RTI this?" Clarification Checker */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px", marginBottom: "28px" }}>
-          <label htmlFor="clarify-query" style={{ display: "block", fontSize: "0.9375rem", fontWeight: 600, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
-            3. What information are you looking for? (Optional)
-          </label>
-          <div className="form-hint">
-            Describe what you need. We will verify whether it is suitable for an RTI request.
-          </div>
-          <input
-            id="clarify-query"
-            type="text"
-            value={issueQuery}
-            onChange={(e) => setIssueQuery(e.target.value)}
-            placeholder="e.g. Why is my EPF pension claim still pending?"
-            className="form-control"
-          />
-
-          {isComplaint && (
-            <div className="gov-alert gov-alert-warning" style={{ marginTop: "12px" }}>
-              <strong>Notice:</strong> If you are seeking action on a service dispute, RTI provides <em>official records and decision notes</em>, but cannot order authorities to resolve complaints or release funds. For grievance redressal, consider lodging on <a href="https://pgportal.gov.in" target="_blank" rel="noopener noreferrer">CPGRAMS</a>.
-            </div>
-          )}
-        </div>
-
-        {/* Action Button */}
-        {jurisdiction !== "STATE" && (
-          <button
-            type="button"
-            className="btn-primary-action"
-            onClick={handleContinue}
-            style={{ width: "100%", padding: "12px" }}
-          >
-            Continue to application →
-          </button>
-        )}
-      </div>
-    </main>
-  );
-}
-
-export default function EligibilityCheckerPage() {
   return (
     <PortalPage>
-      <Suspense fallback={<div className="wrap" style={{ padding: "40px 0" }}>Loading...</div>}>
-        <EligibilityCheckerContent />
-      </Suspense>
+      <main className="wrap" style={{ padding: "40px 0 80px" }}>
+        <div className="bread">
+          <Link href="/">Home</Link>
+          <span>›</span>
+          <Link href="/request">File RTI</Link>
+          <span>›</span>
+          <span>Before you start</span>
+        </div>
+
+        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+          {/* Header Title */}
+          <div style={{ marginBottom: "28px" }}>
+            <h1 style={{ font: "700 2.2rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
+              Before you start
+            </h1>
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.95rem", lineHeight: "1.6", margin: 0 }}>
+              Under the RTI Act, 2005, only Indian citizens can request public information. This portal processes requests for <strong>Central Government Public Authorities</strong>.
+            </p>
+          </div>
+
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            {/* Question 1: Citizenship */}
+            <fieldset style={{ border: 0, padding: 0, margin: "0 0 28px" }}>
+              <legend style={{ fontWeight: 700, fontSize: "1rem", color: "var(--gov-navy-950)", marginBottom: "10px" }}>
+                1. Are you a Citizen of India? <span style={{ color: "#dc2626" }}>*</span>
+              </legend>
+              <div style={{ display: "flex", gap: "24px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.92rem" }}>
+                  <input
+                    type="radio"
+                    name="citizenship"
+                    checked={isIndianCitizen === true}
+                    onChange={() => setIsIndianCitizen(true)}
+                  />
+                  <span>Yes, I am an Indian Citizen</span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.92rem" }}>
+                  <input
+                    type="radio"
+                    name="citizenship"
+                    checked={isIndianCitizen === false}
+                    onChange={() => setIsIndianCitizen(false)}
+                  />
+                  <span>No</span>
+                </label>
+              </div>
+
+              {isIndianCitizen === false && (
+                <div style={{ marginTop: "12px", padding: "12px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "var(--radius-sm)", fontSize: "0.84rem", color: "#991b1b" }}>
+                  Section 3 of the Right to Information Act, 2005 restricts the right to receive information to Indian citizens only.
+                </div>
+              )}
+            </fieldset>
+
+            {/* Question 2: Central vs State Jurisdiction */}
+            <fieldset style={{ border: 0, padding: 0, margin: "0 0 28px" }}>
+              <legend style={{ fontWeight: 700, fontSize: "1rem", color: "var(--gov-navy-950)", marginBottom: "10px" }}>
+                2. Who do you think holds the information? <span style={{ color: "#dc2626" }}>*</span>
+              </legend>
+
+              <div style={{ display: "grid", gap: "10px" }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", cursor: "pointer", background: govLevel === "CENTRAL" ? "var(--neutral-50)" : "#ffffff" }}>
+                  <input
+                    type="radio"
+                    name="govLevel"
+                    checked={govLevel === "CENTRAL"}
+                    onChange={() => setGovLevel("CENTRAL")}
+                    style={{ marginTop: "4px" }}
+                  />
+                  <div>
+                    <strong style={{ color: "var(--gov-navy-950)", fontSize: "0.92rem", display: "block" }}>
+                      Central Government / Ministry / PSU
+                    </strong>
+                    <span style={{ fontSize: "0.82rem", color: "var(--neutral-600)" }}>
+                      Includes Passports (MEA), Railways, EPFO, Income Tax, CBSE, Nationalized Banks, UPSC, Defense.
+                    </span>
+                  </div>
+                </label>
+
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", cursor: "pointer", background: govLevel === "STATE" ? "var(--neutral-50)" : "#ffffff" }}>
+                  <input
+                    type="radio"
+                    name="govLevel"
+                    checked={govLevel === "STATE"}
+                    onChange={() => setGovLevel("STATE")}
+                    style={{ marginTop: "4px" }}
+                  />
+                  <div>
+                    <strong style={{ color: "var(--gov-navy-950)", fontSize: "0.92rem", display: "block" }}>
+                      State Government / Police / Municipality
+                    </strong>
+                    <span style={{ fontSize: "0.82rem", color: "var(--neutral-600)" }}>
+                      Includes State Police, Municipal Corporations, Ration cards, Land records, State Universities.
+                    </span>
+                  </div>
+                </label>
+
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", cursor: "pointer", background: govLevel === "NOT_SURE" ? "var(--neutral-50)" : "#ffffff" }}>
+                  <input
+                    type="radio"
+                    name="govLevel"
+                    checked={govLevel === "NOT_SURE"}
+                    onChange={() => setGovLevel("NOT_SURE")}
+                    style={{ marginTop: "4px" }}
+                  />
+                  <div>
+                    <strong style={{ color: "var(--gov-navy-950)", fontSize: "0.92rem", display: "block" }}>
+                      I am not sure
+                    </strong>
+                    <span style={{ fontSize: "0.82rem", color: "var(--neutral-600)" }}>
+                      Our assistant will help identify the authority during the request stage.
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </fieldset>
+
+            {/* STATE DIRECTORY (ALL 28 STATES + 8 UTs WITH ONLINE vs OFFLINE ROUTING) */}
+            {govLevel === "STATE" && (
+              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "var(--radius-md)", padding: "18px 20px", marginBottom: "28px" }}>
+                <strong style={{ color: "#92400e", fontSize: "0.92rem", display: "block", marginBottom: "6px" }}>
+                  State Government RTI Directory
+                </strong>
+                <p style={{ fontSize: "0.84rem", color: "#78350f", margin: "0 0 12px", lineHeight: "1.5" }}>
+                  Central RTI Online does not process State matters. Select your State to view its official portal or generate an offline Section 6(1) letter:
+                </p>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <label htmlFor="state-select" style={{ fontSize: "0.82rem", fontWeight: 700, color: "#92400e", display: "block", marginBottom: "4px" }}>
+                    Select State / Union Territory:
+                  </label>
+                  <select
+                    id="state-select"
+                    value={selectedState}
+                    onChange={(e) => setSelectedState(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", border: "1px solid #d97706", borderRadius: "var(--radius-sm)", fontSize: "0.88rem", background: "#ffffff", color: "var(--neutral-900)" }}
+                  >
+                    {allIndiaStatePortals.map((s) => (
+                      <option key={s.state} value={s.state}>
+                        {s.state} {s.hasOnlinePortal ? "(Online Portal Available)" : "(Offline Filing via Postal Order)"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {stateInfo && (
+                  <div style={{ background: "#ffffff", border: "1px solid #fcd34d", borderRadius: "var(--radius-sm)", padding: "14px", fontSize: "0.82rem" }}>
+                    <div style={{ fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                      {stateInfo.state} RTI Guidelines:
+                    </div>
+                    <p style={{ margin: "0 0 8px", color: "var(--neutral-700)" }}>
+                      {stateInfo.description}
+                    </p>
+                    <div style={{ color: "var(--neutral-600)", marginBottom: "12px" }}>
+                      <strong>Prescribed Fee Mode: </strong>{stateInfo.feeMode}
+                    </div>
+
+                    {stateInfo.hasOnlinePortal && stateInfo.portalUrl ? (
+                      <a
+                        href={stateInfo.portalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-file-primary"
+                        style={{ display: "inline-block", background: "var(--gov-navy-900)", padding: "8px 14px", fontSize: "0.82rem" }}
+                      >
+                        Go to Official {stateInfo.portalName || "State Portal"} ↗
+                      </a>
+                    ) : (
+                      <Link
+                        href={`/offline?state=${encodeURIComponent(stateInfo.state)}`}
+                        className="btn-hero-primary"
+                        style={{ display: "inline-block", padding: "8px 14px", fontSize: "0.82rem" }}
+                      >
+                        Prepare Offline Section 6(1) Form for {stateInfo.state} →
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* HELPFUL "CAN I RTI THIS?" CHECKER */}
+            <div style={{ borderTop: "1px solid var(--neutral-200)", paddingTop: "20px", marginTop: "10px" }}>
+              <label htmlFor="can-i-rti" style={{ display: "block", fontSize: "0.88rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                Unsure if RTI is right for your issue?
+              </label>
+              <input
+                id="can-i-rti"
+                type="text"
+                value={canIRtiText}
+                onChange={(e) => setCanIRtiText(e.target.value)}
+                placeholder="Type your issue (e.g. My PF money hasn't arrived, or want certified marksheet)..."
+                style={{ width: "100%", padding: "9px 12px", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.85rem", color: "var(--neutral-900)" }}
+              />
+
+              {canIRtiText && (
+                <div style={{ marginTop: "10px", background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "12px 14px", fontSize: "0.82rem" }}>
+                  {isComplaint ? (
+                    <div>
+                      <strong style={{ color: "#92400e", display: "block", marginBottom: "4px" }}>
+                        You may want to file a grievance first:
+                      </strong>
+                      <div style={{ color: "var(--neutral-700)", lineHeight: "1.5" }}>
+                        • RTI can give you: <em>processing logs, file copies, reasons recorded on file</em>.<br />
+                        • RTI cannot: <em>order release of funds or resolve service complaints</em>.<br />
+                        <a href="https://pgportal.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: "#92400e", fontWeight: 700 }}>
+                          Lodge Grievance on CPGRAMS ↗
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <strong style={{ color: "var(--forest-700)", display: "block", marginBottom: "2px" }}>
+                        ✓ Suitable for RTI:
+                      </strong>
+                      <span style={{ color: "var(--neutral-700)" }}>
+                        You can request official notesheets, circulars, inspection reports, and certified documents.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Actions */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "32px", paddingTop: "18px", borderTop: "1px solid var(--neutral-200)" }}>
+              {isIndianCitizen && govLevel !== "STATE" && (
+                <Link
+                  href="/request/new"
+                  className="btn-hero-primary"
+                >
+                  Continue to application (1 of 4) →
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     </PortalPage>
   );
 }

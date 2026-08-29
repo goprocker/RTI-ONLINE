@@ -6,7 +6,6 @@ export interface NavItem {
 }
 
 export const primaryNavigation: readonly NavItem[] = [
-  { href: "/", label: "Home" },
   { href: "/request/eligibility", label: "File RTI" },
   { href: "/status", label: "Track" },
   { href: "/appeal", label: "First Appeal" },
@@ -15,11 +14,11 @@ export const primaryNavigation: readonly NavItem[] = [
     href: "/help",
     label: "Help",
     children: [
-      { href: "/search", label: "Public information search", desc: "Search existing published records" },
-      { href: "/faq", label: "Frequently asked questions", desc: "Common questions on RTI rules and fees" },
-      { href: "/reconciliation", label: "Payment issue", desc: "Check deducted payment without registration number" },
-      { href: "/offline", label: "Offline RTI application", desc: "Prepare physical letter for postal submission" },
-      { href: "/manual", label: "User guide", desc: "Step-by-step guidance on using the portal" }
+      { href: "/manual", label: "How RTI works", desc: "Simple step-by-step guide to filing and timelines" },
+      { href: "/faq", label: "Frequently asked questions", desc: "Common questions about fees, eligibility, and rules" },
+      { href: "/search", label: "Search public information", desc: "Find published records before filing a new RTI" },
+      { href: "/offline", label: "Prepare offline application", desc: "Printable Section 6(1) letter for states without online portals" },
+      { href: "/reconciliation", label: "Payment issue", desc: "Check status if payment was deducted without an RTI number" }
     ]
   }
 ] as const;
@@ -28,14 +27,14 @@ export const footerNavigation = [
   { href: "/request/eligibility", label: "File an RTI" },
   { href: "/status", label: "Track an application" },
   { href: "/appeal", label: "File a First Appeal" },
-  { href: "/authorities", label: "Find public authorities" },
-  { href: "/search", label: "Search public records" },
+  { href: "/authorities", label: "Find a public authority" },
+  { href: "/search", label: "Search public disclosures" },
+  { href: "/offline", label: "Offline RTI application" },
   { href: "/reconciliation", label: "Payment issue" },
-  { href: "/offline", label: "Postal / Offline application" },
-  { href: "/faq", label: "FAQ & Help" },
+  { href: "/faq", label: "Frequently asked questions" },
   { href: "/accessibility", label: "Accessibility statement" },
-  { href: "/privacy", label: "Privacy notice" },
-  { href: "/contact", label: "Contact support" }
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/contact", label: "Contact and support" }
 ] as const;
 
 export const prototypeNotice =
@@ -46,22 +45,22 @@ export const serviceNotice = prototypeNotice;
 export const serviceSteps = [
   {
     number: "01",
-    title: "Find Public Authority",
-    body: "Identify the Central Ministry, Department, or Public Authority that holds the requested records."
+    title: "You file a request",
+    body: "Identify the public authority holding the records, write your questions, and submit with ₹10 (or ₹0 for BPL)."
   },
   {
     number: "02",
-    title: "Draft Specific Request",
-    body: "Specify the information or documents within 3,000 characters (or attach a supporting PDF)."
+    title: "Public Authority receives it",
+    body: "A unique registration number is generated instantly. The Nodal Officer assigns the file to the concerned CPIO."
   },
   {
     number: "03",
-    title: "Pay ₹10 or Claim BPL Exemption",
-    body: "Standard fee is ₹10 via UPI/Debit Card. Below Poverty Line (BPL) citizens pay ₹0 with certificate."
+    title: "CPIO processes the records",
+    body: "The officer retrieves relevant files, notesheets, or decisions from government archives."
   },
   {
     number: "04",
-    title: "Track Statutory Timeline",
-    body: "Follow statutory 30-day response window. File First Appeal at zero fee if unsatisfied or delayed."
+    title: "You receive a response",
+    body: "A digitally signed response is issued within 30 days. If unsatisfied, you can file a First Appeal at zero fee."
   }
 ] as const;

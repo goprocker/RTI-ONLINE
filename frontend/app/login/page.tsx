@@ -8,84 +8,66 @@ import { useAuth } from "../../lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { loginWithOTP, loginWithPassword } = useAuth();
 
   const [authMode, setAuthMode] = useState<"OTP" | "PASSWORD">("OTP");
   const [mobile, setMobile] = useState("9876543210");
-  const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVal, setOtpVal] = useState("123456");
 
-  const [username, setUsername] = useState("citizen_user");
-  const [password, setPassword] = useState("password123");
+  const [username, setUsername] = useState("citizen_rajesh");
+  const [password, setPassword] = useState("••••••••");
 
   function handleSendOtp() {
-    if (!mobile.trim() || mobile.trim().length !== 10) {
-      alert("Please enter a valid 10-digit mobile number.");
-      return;
-    }
+    if (!mobile.trim()) return;
     setOtpSent(true);
   }
 
   function handleVerifyOtp() {
-    login({
-      name: "Rajesh Sharma",
-      email: "rajesh.sharma@example.gov.in",
-      mobile: mobile,
-      address: "Flat 402, Kaveri Apartments, Indiranagar, Bengaluru",
-      pincode: "560038",
-      state: "Karnataka",
-      gender: "Male"
-    });
+    loginWithOTP(mobile, otpVal);
     router.push("/dashboard");
   }
 
-  function handlePasswordLogin() {
-    login({
-      name: "Rajesh Sharma",
-      email: "rajesh.sharma@example.gov.in",
-      mobile: "9876543210",
-      address: "Flat 402, Kaveri Apartments, Indiranagar, Bengaluru",
-      pincode: "560038",
-      state: "Karnataka",
-      gender: "Male"
-    });
+  function handlePasswordLogin(e: React.FormEvent) {
+    e.preventDefault();
+    loginWithPassword(username, password);
     router.push("/dashboard");
   }
 
   return (
     <PortalPage>
-      <main className="wrap" style={{ padding: "40px 20px 80px" }}>
+      <main className="wrap" style={{ padding: "48px 0 80px" }}>
         <div className="bread">
           <Link href="/">Home</Link>
           <span>›</span>
           <span>Sign in</span>
         </div>
 
-        <div className="form-wrap">
-          <h1 style={{ fontSize: "1.75rem", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
-            Sign in to RTI Online
-          </h1>
-          <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", lineHeight: "1.5", margin: "0 0 24px" }}>
-            Sign in to view your filed applications, download response orders, and autofill future requests.
-          </p>
+        <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <h1 style={{ font: "700 2rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+              Sign in to RTI Online
+            </h1>
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: 0 }}>
+              Access your filed requests, track status, and view response orders.
+            </p>
+          </div>
 
-          {/* Login Card */}
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)", marginBottom: "24px" }}>
-            {/* Mode Switcher Tabs */}
-            <div style={{ display: "flex", borderBottom: "1px solid var(--neutral-200)", marginBottom: "20px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            {/* Tabs */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", background: "var(--neutral-100)", padding: "4px", borderRadius: "var(--radius-sm)", marginBottom: "24px" }}>
               <button
                 type="button"
                 onClick={() => setAuthMode("OTP")}
                 style={{
-                  flex: 1,
-                  padding: "10px",
-                  background: "none",
-                  border: "none",
-                  borderBottom: authMode === "OTP" ? "2px solid var(--gov-navy-950)" : "2px solid transparent",
-                  fontWeight: authMode === "OTP" ? 700 : 500,
-                  color: authMode === "OTP" ? "var(--gov-navy-950)" : "var(--neutral-500)",
-                  cursor: "pointer",
-                  fontSize: "0.9375rem"
+                  background: authMode === "OTP" ? "#ffffff" : "transparent",
+                  color: authMode === "OTP" ? "var(--gov-navy-950)" : "var(--neutral-600)",
+                  border: 0,
+                  padding: "8px",
+                  borderRadius: "var(--radius-xs)",
+                  fontSize: "0.84rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
                 }}
               >
                 Mobile OTP
@@ -94,15 +76,14 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setAuthMode("PASSWORD")}
                 style={{
-                  flex: 1,
-                  padding: "10px",
-                  background: "none",
-                  border: "none",
-                  borderBottom: authMode === "PASSWORD" ? "2px solid var(--gov-navy-950)" : "2px solid transparent",
-                  fontWeight: authMode === "PASSWORD" ? 700 : 500,
-                  color: authMode === "PASSWORD" ? "var(--gov-navy-950)" : "var(--neutral-500)",
-                  cursor: "pointer",
-                  fontSize: "0.9375rem"
+                  background: authMode === "PASSWORD" ? "#ffffff" : "transparent",
+                  color: authMode === "PASSWORD" ? "var(--gov-navy-950)" : "var(--neutral-600)",
+                  border: 0,
+                  padding: "8px",
+                  borderRadius: "var(--radius-xs)",
+                  fontSize: "0.84rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
                 }}
               >
                 Username & Password
@@ -111,47 +92,48 @@ export default function LoginPage() {
 
             {authMode === "OTP" ? (
               <div>
-                <div className="form-group">
-                  <label htmlFor="login-mobile">10-Digit Mobile Number <span style={{ color: "#dc2626" }}>*</span></label>
+                <div style={{ marginBottom: "16px" }}>
+                  <label htmlFor="login-mobile" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                    Enter Mobile Number
+                  </label>
                   <input
                     id="login-mobile"
                     type="tel"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
-                    placeholder="e.g. 9876543210"
-                    className="form-control"
-                    disabled={otpSent}
+                    placeholder="10-digit mobile number"
+                    style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.92rem", fontFamily: "var(--font-number)" }}
                   />
                 </div>
 
                 {!otpSent ? (
                   <button
                     type="button"
-                    className="btn-primary-action"
+                    className="btn-hero-primary"
                     onClick={handleSendOtp}
-                    style={{ width: "100%", padding: "11px" }}
+                    style={{ width: "100%", justifyContent: "center", padding: "10px" }}
                   >
                     Send OTP →
                   </button>
                 ) : (
                   <div>
-                    <div className="form-group">
-                      <label htmlFor="login-otp">Enter 6-Digit OTP</label>
+                    <div style={{ marginBottom: "16px" }}>
+                      <label htmlFor="login-otp" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                        Enter 6-digit OTP (Demo code: 123456)
+                      </label>
                       <input
                         id="login-otp"
                         type="text"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="e.g. 123456"
-                        className="form-control"
-                        style={{ fontFamily: "var(--font-number)", letterSpacing: "0.2em", textAlign: "center" }}
+                        value={otpVal}
+                        onChange={(e) => setOtpVal(e.target.value)}
+                        style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "1rem", letterSpacing: "0.2em", textAlign: "center" }}
                       />
                     </div>
                     <button
                       type="button"
-                      className="btn-primary-action"
+                      className="btn-hero-primary"
                       onClick={handleVerifyOtp}
-                      style={{ width: "100%", padding: "11px" }}
+                      style={{ width: "100%", justifyContent: "center", padding: "10px" }}
                     >
                       Verify & Sign In →
                     </button>
@@ -159,47 +141,50 @@ export default function LoginPage() {
                 )}
               </div>
             ) : (
-              <div>
-                <div className="form-group">
-                  <label htmlFor="login-user">Username or Email <span style={{ color: "#dc2626" }}>*</span></label>
+              <form onSubmit={handlePasswordLogin}>
+                <div style={{ marginBottom: "14px" }}>
+                  <label htmlFor="login-user" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                    Username / Registration ID
+                  </label>
                   <input
                     id="login-user"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="form-control"
+                    style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.92rem" }}
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="login-pwd">Password <span style={{ color: "#dc2626" }}>*</span></label>
+                <div style={{ marginBottom: "18px" }}>
+                  <label htmlFor="login-pwd" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                    Password
+                  </label>
                   <input
                     id="login-pwd"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="form-control"
+                    style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.92rem" }}
                   />
                 </div>
                 <button
-                  type="button"
-                  className="btn-primary-action"
-                  onClick={handlePasswordLogin}
-                  style={{ width: "100%", padding: "11px" }}
+                  type="submit"
+                  className="btn-hero-primary"
+                  style={{ width: "100%", justifyContent: "center", padding: "10px" }}
                 >
                   Sign In →
                 </button>
-              </div>
+              </form>
             )}
-          </div>
 
-          {/* Guest Continuation Notice */}
-          <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", padding: "16px 20px", textAlign: "center" }}>
-            <p style={{ margin: "0 0 8px", fontSize: "0.875rem", color: "var(--neutral-700)" }}>
-              You do not need an account to file an RTI request.
-            </p>
-            <Link href="/request/eligibility" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gov-blue-600)" }}>
-              Continue without signing in →
-            </Link>
+            {/* Guest Option */}
+            <div style={{ marginTop: "24px", paddingTop: "18px", borderTop: "1px solid var(--neutral-200)", textAlign: "center" }}>
+              <div style={{ fontSize: "0.82rem", color: "var(--neutral-600)", marginBottom: "6px" }}>
+                You don&apos;t need an account to file an RTI.
+              </div>
+              <Link href="/request/eligibility" style={{ fontSize: "0.84rem", fontWeight: 700, color: "var(--gov-navy-900)", textDecoration: "none" }}>
+                Continue without signing in →
+              </Link>
+            </div>
           </div>
         </div>
       </main>

@@ -6,40 +6,37 @@ import { PortalPage } from "../components/portal-shell";
 import { findMatchingAuthorities, SearchMatchResult } from "../lib/authorities-data";
 
 export default function Home() {
-  const [authorityQuery, setAuthorityQuery] = useState("");
-  const [guideResult, setGuideResult] = useState<SearchMatchResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [matchedAuthority, setMatchedAuthority] = useState<SearchMatchResult | null>(null);
 
-  function handleAuthoritySearch(val: string) {
-    setAuthorityQuery(val);
+  function handleSearch(val: string) {
+    setSearchQuery(val);
     if (val.trim().length > 1) {
-      const matches = findMatchingAuthorities(val);
-      setGuideResult(matches.length > 0 ? matches[0] : null);
+      const results = findMatchingAuthorities(val);
+      setMatchedAuthority(results.length > 0 ? results[0] : null);
     } else {
-      setGuideResult(null);
+      setMatchedAuthority(null);
     }
   }
 
   return (
     <PortalPage>
-      {/* 01. CALM HERO SECTION */}
-      <section style={{ padding: "48px 0 40px", background: "#ffffff", borderBottom: "1px solid var(--neutral-200)" }}>
+      {/* 01 — CITIZEN HERO */}
+      <section className="home-hero-section">
         <div className="wrap">
-          <div style={{ maxWidth: "720px" }}>
-            <span style={{ display: "inline-block", fontSize: "0.8125rem", fontWeight: 700, color: "var(--gov-navy-800)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-              Right to Information
-            </span>
-            <h1 style={{ font: "700 clamp(2.2rem, 4vw, 3.2rem)/1.15 var(--font-sans)", color: "var(--gov-navy-950)", margin: "0 0 16px", letterSpacing: "-0.03em" }}>
+          <div className="home-hero-inner">
+            <h1 className="home-hero-title">
               Get information from public authorities.
             </h1>
-            <p style={{ fontSize: "1.125rem", color: "var(--neutral-700)", lineHeight: "1.6", margin: "0 0 28px" }}>
-              Request official records, documents, and information from Central Government ministries, departments, and public authorities under the RTI Act, 2005.
+            <p className="home-hero-lead">
+              Request official government records, documents, notesheets, and decisions under the Right to Information Act, 2005.
             </p>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
-              <Link href="/request/eligibility" className="btn-primary-action" style={{ padding: "12px 24px", fontSize: "1rem" }}>
+            <div className="home-hero-actions">
+              <Link href="/request/eligibility" className="btn-hero-primary">
                 File an RTI
               </Link>
-              <Link href="/status" style={{ fontSize: "0.9375rem", color: "var(--neutral-700)", fontWeight: 500 }}>
+              <Link href="/status" className="hero-secondary-link">
                 Already filed? Track your application →
               </Link>
             </div>
@@ -47,192 +44,217 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 02. "WHAT ARE YOU TRYING TO DO?" CITIZEN INTENT ROUTER */}
-      <section style={{ padding: "40px 0", background: "var(--neutral-50)", borderBottom: "1px solid var(--neutral-200)" }}>
+      {/* 02 — STAR INNOVATION: NATURAL LANGUAGE AUTHORITY FINDER */}
+      <section className="authority-finder-section">
         <div className="wrap">
-          <h2 style={{ fontSize: "1.25rem", color: "var(--gov-navy-950)", margin: "0 0 20px" }}>
-            What are you trying to do?
-          </h2>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
-            {/* Intent 1: File RTI */}
-            <Link href="/request/eligibility" className="service-card">
-              <h3 style={{ fontSize: "1.05rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                I need government information
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                Request copies of official files, decisions, policies, or evaluation marks.
+          <div className="finder-box">
+            <div className="finder-header">
+              <h2 className="finder-title">
+                Not sure where to send your RTI?
+              </h2>
+              <p className="finder-subtitle">
+                Describe the information you need in plain language. We&apos;ll help you find the responsible ministry or department.
               </p>
-              <span style={{ fontSize: "0.875rem", color: "var(--gov-blue-600)", fontWeight: 600 }}>
-                File an RTI →
-              </span>
-            </Link>
-
-            {/* Intent 2: Grievance (CPGRAMS) */}
-            <a href="https://pgportal.gov.in" target="_blank" rel="noopener noreferrer" className="service-card">
-              <h3 style={{ fontSize: "1.05rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                My government service has a problem
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                RTI is for records. For complaints and service disputes, use the grievance portal.
-              </p>
-              <span style={{ fontSize: "0.875rem", color: "var(--neutral-800)", fontWeight: 600 }}>
-                File a grievance (CPGRAMS) ↗
-              </span>
-            </a>
-
-            {/* Intent 3: Track / First Appeal */}
-            <Link href="/status" className="service-card">
-              <h3 style={{ fontSize: "1.05rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                I haven&apos;t received my response
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                Check statutory 30-day timeline or file a First Appeal if delayed or unsatisfied.
-              </p>
-              <span style={{ fontSize: "0.875rem", color: "var(--gov-blue-600)", fontWeight: 600 }}>
-                Check status or appeal →
-              </span>
-            </Link>
-
-            {/* Intent 4: Authority Finder */}
-            <Link href="/authorities" className="service-card">
-              <h3 style={{ fontSize: "1.05rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                I don&apos;t know which department
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 12px" }}>
-                Describe what information you need and we will help you find the right public authority.
-              </p>
-              <span style={{ fontSize: "0.875rem", color: "var(--gov-blue-600)", fontWeight: 600 }}>
-                Find authority →
-              </span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 03. STAR AUTHORITY FINDER: SINGLE DIRECT QUESTION */}
-      <section style={{ padding: "48px 0", background: "#ffffff", borderBottom: "1px solid var(--neutral-200)" }}>
-        <div className="wrap">
-          <div style={{ maxWidth: "760px" }}>
-            <h2 style={{ fontSize: "1.375rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-              Not sure where to send your RTI?
-            </h2>
-            <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
-              Describe what information you need in plain language:
-            </p>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
-              <input
-                type="text"
-                value={authorityQuery}
-                onChange={(e) => handleAuthoritySearch(e.target.value)}
-                placeholder="e.g. Why is my passport application still pending?"
-                className="form-control"
-                style={{ flex: "1 1 340px", padding: "12px 14px", fontSize: "0.9375rem" }}
-              />
-              <button
-                type="button"
-                className="btn-secondary-action"
-                onClick={() => {}}
-                style={{ padding: "12px 20px" }}
-              >
-                Find authority
-              </button>
             </div>
 
-            {/* Match Result Card */}
-            {guideResult ? (
-              <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "20px" }}>
-                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--gov-blue-600)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
-                  Likely Match
-                </span>
-                <h3 style={{ fontSize: "1.125rem", color: "var(--gov-navy-950)", margin: "0 0 2px" }}>
-                  {guideResult.authority.name}
-                </h3>
-                <div style={{ fontSize: "0.875rem", color: "var(--neutral-600)", marginBottom: "12px" }}>
-                  {guideResult.authority.ministry}
-                </div>
+            <div className="finder-input-row">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="e.g. Why is my passport application still pending, or EPFO claim status..."
+                className="finder-input"
+                aria-label="Describe what information you need"
+              />
+              <Link
+                href={
+                  matchedAuthority
+                    ? `/request/new?authority=${encodeURIComponent(matchedAuthority.authority.id)}`
+                    : `/authorities?q=${encodeURIComponent(searchQuery)}`
+                }
+                className="btn-finder-search"
+              >
+                Find the right authority
+              </Link>
+            </div>
 
-                <div style={{ fontSize: "0.875rem", color: "var(--neutral-800)", marginBottom: "16px", lineHeight: "1.5" }}>
-                  <strong>Why this match?</strong> {guideResult.authority.nodalOfficerDesc}
-                </div>
-
-                <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+            {/* Matched Authority Result Card */}
+            {matchedAuthority && (
+              <div className="finder-match-card">
+                <div className="finder-match-top">
+                  <div>
+                    <span className="match-pill">Likely match</span>
+                    <h3 className="match-authority-name">{matchedAuthority.authority.name}</h3>
+                    <div className="match-ministry-name">{matchedAuthority.authority.ministry}</div>
+                  </div>
                   <Link
-                    href={`/request/new?authority=${encodeURIComponent(guideResult.authority.id)}`}
-                    className="btn-primary-action"
-                    style={{ padding: "8px 16px", fontSize: "0.875rem" }}
+                    href={`/request/new?authority=${encodeURIComponent(matchedAuthority.authority.id)}`}
+                    className="btn-use-authority"
                   >
                     Use this authority →
                   </Link>
-                  <Link href="/authorities" style={{ fontSize: "0.875rem", color: "var(--neutral-600)" }}>
-                    View other matches
+                </div>
+
+                <div className="match-reason-box">
+                  <strong>Why this match? </strong>
+                  {matchedAuthority.authority.nodalOfficerDesc}
+                </div>
+
+                <div className="match-footer-links">
+                  <span>Common topics: {matchedAuthority.authority.commonTopics?.join(" · ") || matchedAuthority.authority.keywords.slice(0, 4).join(" · ")}</span>
+                  <Link href={`/authorities?q=${encodeURIComponent(searchQuery)}`} className="match-other-link">
+                    View other matches →
                   </Link>
                 </div>
-              </div>
-            ) : (
-              <div style={{ fontSize: "0.8125rem", color: "var(--neutral-500)" }}>
-                Popular queries: <em>Passport delay</em>, <em>EPF claim status</em>, <em>CBSE answer sheet copy</em>, <em>Railway refund rules</em>.
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* 04. HOW RTI WORKS: 4 SIMPLE STEPS */}
-      <section style={{ padding: "48px 0 56px", background: "var(--neutral-50)" }}>
+      {/* 03 — WHAT ARE YOU TRYING TO DO? (INTENT ROUTER) */}
+      <section className="intent-router-section">
         <div className="wrap">
-          <h2 style={{ fontSize: "1.25rem", color: "var(--gov-navy-950)", margin: "0 0 28px" }}>
-            How RTI works
-          </h2>
+          <div className="section-heading-center">
+            <h2 className="section-title">What are you trying to do?</h2>
+            <p className="section-subtitle">Choose the service that matches your requirement</p>
+          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px" }}>
-              <span style={{ font: "700 1.25rem var(--font-sans)", color: "var(--neutral-400)", display: "block", marginBottom: "8px" }}>
-                1
-              </span>
-              <h3 style={{ fontSize: "1rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                You file a request
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: 0, lineHeight: "1.5" }}>
-                Select the public authority, state your questions, and pay the ₹10 statutory fee (or ₹0 for BPL).
+          <div className="intent-grid">
+            {/* 1. Request Records */}
+            <Link href="/request/eligibility" className="intent-card">
+              <div className="intent-card-header">
+                <span className="intent-number">01</span>
+                <h3 className="intent-card-title">I need government information</h3>
+              </div>
+              <p className="intent-card-body">
+                Request certified copies of files, circulars, exam answer scripts, or official status records.
+              </p>
+              <span className="intent-card-action">File an RTI request →</span>
+            </Link>
+
+            {/* 2. Service Complaint */}
+            <div className="intent-card intent-card-alt">
+              <div className="intent-card-header">
+                <span className="intent-number">02</span>
+                <h3 className="intent-card-title">My service has a problem</h3>
+              </div>
+              <p className="intent-card-body">
+                RTI provides records, not service resolution. For complaints or service delays, lodge on CPGRAMS.
+              </p>
+              <a
+                href="https://pgportal.gov.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="intent-card-action external-action"
+              >
+                File a grievance on CPGRAMS ↗
+              </a>
+            </div>
+
+            {/* 3. Awaiting Response / Appeal */}
+            <Link href="/appeal" className="intent-card">
+              <div className="intent-card-header">
+                <span className="intent-number">03</span>
+                <h3 className="intent-card-title">I haven&apos;t received a response</h3>
+              </div>
+              <p className="intent-card-body">
+                If your RTI response is delayed beyond 30 days or incomplete, appeal under Section 19(1) at zero fee.
+              </p>
+              <span className="intent-card-action">File a First Appeal →</span>
+            </Link>
+
+            {/* 4. Don't Know Department */}
+            <Link href="/authorities" className="intent-card">
+              <div className="intent-card-header">
+                <span className="intent-number">04</span>
+                <h3 className="intent-card-title">I don&apos;t know which department</h3>
+              </div>
+              <p className="intent-card-body">
+                Browse our directory of Central Public Authorities or search by administrative topic.
+              </p>
+              <span className="intent-card-action">Browse public authorities →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 04 — HOW RTI WORKS (QUIET 4-STEP VERTICAL PROGRESSION) */}
+      <section className="how-it-works-section">
+        <div className="wrap">
+          <div className="section-heading-center">
+            <h2 className="section-title">How RTI works</h2>
+            <p className="section-subtitle">A straightforward, time-bound legal process for every citizen</p>
+          </div>
+
+          <div className="steps-flow-grid">
+            <div className="step-flow-item">
+              <div className="step-number-badge">1</div>
+              <h3 className="step-flow-title">You file a request</h3>
+              <p className="step-flow-text">
+                Identify the public authority, write your questions, and pay the ₹10 fee (₹0 for BPL).
               </p>
             </div>
 
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px" }}>
-              <span style={{ font: "700 1.25rem var(--font-sans)", color: "var(--neutral-400)", display: "block", marginBottom: "8px" }}>
-                2
-              </span>
-              <h3 style={{ fontSize: "1rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                Authority receives it
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: 0, lineHeight: "1.5" }}>
-                The Nodal Officer verifies jurisdiction and assigns your request to the concerned CPIO.
+            <div className="step-flow-item">
+              <div className="step-number-badge">2</div>
+              <h3 className="step-flow-title">Authority receives it</h3>
+              <p className="step-flow-text">
+                Registration number is issued immediately and routed to the concerned Public Information Officer.
               </p>
             </div>
 
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px" }}>
-              <span style={{ font: "700 1.25rem var(--font-sans)", color: "var(--neutral-400)", display: "block", marginBottom: "8px" }}>
-                3
-              </span>
-              <h3 style={{ fontSize: "1rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                CPIO retrieves records
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: 0, lineHeight: "1.5" }}>
-                The Public Information Officer gathers the official records, notesheets, or circulars.
+            <div className="step-flow-item">
+              <div className="step-number-badge">3</div>
+              <h3 className="step-flow-title">CPIO processes records</h3>
+              <p className="step-flow-text">
+                The officer retrieves official files and prepares a certified statutory disclosure.
               </p>
             </div>
 
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "20px" }}>
-              <span style={{ font: "700 1.25rem var(--font-sans)", color: "var(--neutral-400)", display: "block", marginBottom: "8px" }}>
-                4
-              </span>
-              <h3 style={{ fontSize: "1rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-                Response issued
-              </h3>
-              <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: 0, lineHeight: "1.5" }}>
-                You receive the reply within 30 days. If delayed or incomplete, you can file a First Appeal.
+            <div className="step-flow-item">
+              <div className="step-number-badge">4</div>
+              <h3 className="step-flow-title">You receive a response</h3>
+              <p className="step-flow-text">
+                A signed reply is issued within 30 days. You can file a free First Appeal if unsatisfied.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 05 — SECONDARY CITIZEN SERVICES STRIP */}
+      <section className="secondary-services-section">
+        <div className="wrap">
+          <div className="secondary-services-grid">
+            <div className="secondary-service-item">
+              <h3 className="secondary-item-title">Search existing disclosures</h3>
+              <p className="secondary-item-desc">
+                Many answers are already published in official citizen charters and circulars.
+              </p>
+              <Link href="/search" className="secondary-item-link">
+                Search published records →
+              </Link>
+            </div>
+
+            <div className="secondary-service-item">
+              <h3 className="secondary-item-title">Prepare an offline application</h3>
+              <p className="secondary-item-desc">
+                For states or local bodies without online portals, generate a formal printable letter.
+              </p>
+              <Link href="/offline" className="secondary-item-link">
+                Offline RTI generator →
+              </Link>
+            </div>
+
+            <div className="secondary-service-item">
+              <h3 className="secondary-item-title">Payment deducted without RTI number?</h3>
+              <p className="secondary-item-desc">
+                Verify banking settlement and retrieve pending registration reference.
+              </p>
+              <Link href="/reconciliation" className="secondary-item-link">
+                Check payment status →
+              </Link>
             </div>
           </div>
         </div>

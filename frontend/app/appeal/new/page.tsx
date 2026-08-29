@@ -1,152 +1,137 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { PortalPage } from "../../../components/portal-shell";
 import { useAuth } from "../../../lib/auth-context";
 
-function NewAppealWizardContent() {
-  const router = useRouter();
+function AppealForm() {
   const searchParams = useSearchParams();
   const regNoParam = searchParams.get("regNo") || "DOPT/R/2026/04812";
 
   const { applications } = useAuth();
-  const matchedApp = applications.find((a) => a.regNo === regNoParam);
+  const originalApp = applications.find((a) => a.regNo === regNoParam) || applications[0];
 
   const [appealReason, setAppealReason] = useState<string>("NO_RESPONSE");
-  const [appealGrounds, setAppealGrounds] = useState<string>(
-    "The statutory 30-day timeline expired without any response or interim notice from the CPIO. Kindly direct the CPIO to furnish the requested records free of charge."
-  );
-  const [attachedPdf, setAttachedPdf] = useState<string>("");
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [appealRegNo, setAppealRegNo] = useState<string>("");
+  const [appealGrounds, setAppealGrounds] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedAppealNo, setSubmittedAppealNo] = useState<string | null>(null);
 
-  function handleSubmit() {
-    const newAppealNo = `FAA/A/2026/${Math.floor(10000 + Math.random() * 90000)}`;
-    setAppealRegNo(newAppealNo);
-    setIsSubmitted(true);
+  function handleSubmitAppeal() {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmittedAppealNo(`FAA/A/2026/${Math.floor(1000 + Math.random() * 9000)}`);
+    }, 1000);
   }
 
-  if (isSubmitted) {
+  if (submittedAppealNo) {
     return (
-      <main className="wrap" style={{ padding: "40px 20px 80px" }}>
-        <div className="form-wrap">
-          <div style={{ background: "var(--success-50)", border: "2px solid var(--success-600)", borderRadius: "var(--radius-lg)", padding: "32px 28px", textAlign: "center", marginBottom: "28px" }}>
-            <h1 style={{ fontSize: "1.75rem", color: "var(--success-700)", margin: "0 0 8px" }}>
-              First Appeal submitted
-            </h1>
-            <p style={{ fontSize: "1rem", color: "var(--neutral-700)", margin: "0 0 16px" }}>
-              Your appeal has been assigned to the First Appellate Authority (FAA).
-            </p>
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)", padding: "14px 20px", display: "inline-block" }}>
-              <span style={{ fontSize: "0.8125rem", color: "var(--neutral-500)", display: "block", textTransform: "uppercase" }}>
-                Appeal Registration Number
-              </span>
-              <strong style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", fontFamily: "var(--font-number)" }}>
-                {appealRegNo}
-              </strong>
-            </div>
-            <p style={{ fontSize: "0.8125rem", color: "var(--neutral-600)", marginTop: "12px", marginBottom: 0 }}>
-              Under Section 19(6), the FAA must dispose of the appeal within 30 to 45 days. No fee was charged.
-            </p>
+      <main className="wrap" style={{ padding: "48px 0 80px" }}>
+        <div style={{ maxWidth: "640px", margin: "0 auto", background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "36px", boxShadow: "var(--shadow-md)" }}>
+          <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--forest-700)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            First Appeal Submitted
+          </span>
+          <h1 style={{ font: "700 1.8rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "4px 0 8px" }}>
+            Appeal Reference Number
+          </h1>
+          <div style={{ fontSize: "1.35rem", fontWeight: 800, fontFamily: "var(--font-number)", color: "var(--gov-navy-900)", background: "var(--neutral-100)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "inline-block", marginBottom: "16px" }}>
+            {submittedAppealNo}
           </div>
+          <p style={{ color: "var(--neutral-600)", fontSize: "0.88rem", margin: "0 0 20px" }}>
+            Transmitted to the <strong>First Appellate Authority (FAA)</strong> of {originalApp.publicAuthority}. Under Section 19(6), a decision order will be issued within <strong>30 to 45 days</strong>.
+          </p>
 
-          <div style={{ display: "flex", gap: "12px" }}>
-            <Link href="/dashboard" className="btn-primary-action">
-              View in My Requests →
-            </Link>
-            <Link href="/" className="btn-secondary-action">
-              Return to Home
-            </Link>
-          </div>
+          <Link href="/dashboard" className="btn-file-primary">
+            View in citizen dashboard →
+          </Link>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="wrap" style={{ padding: "40px 20px 80px" }}>
+    <main className="wrap" style={{ padding: "36px 0 80px" }}>
       <div className="bread">
         <Link href="/">Home</Link>
         <span>›</span>
         <Link href="/appeal">First Appeal</Link>
         <span>›</span>
-        <span>File appeal</span>
+        <span>File Appeal</span>
       </div>
 
-      <div className="form-wrap">
-        <h1 style={{ fontSize: "1.75rem", color: "var(--gov-navy-950)", margin: "0 0 8px" }}>
-          File a First Appeal
-        </h1>
-        <p style={{ fontSize: "0.9375rem", color: "var(--neutral-600)", margin: "0 0 24px" }}>
-          Appeal against the response or delay of RTI application <strong>{regNoParam}</strong>.
-        </p>
-
-        {/* Original Application Card */}
-        <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginBottom: "24px", fontSize: "0.875rem" }}>
-          <div><strong>Original RTI Reg No:</strong> {regNoParam}</div>
-          <div><strong>Subject:</strong> {matchedApp?.subject || "Official inspection and status records"}</div>
-          <div><strong>Authority:</strong> {matchedApp?.department || "Department of Personnel & Training"} ({matchedApp?.ministry || "Ministry of Personnel"})</div>
-          <div><strong>Statutory Fee:</strong> ₹0 (Free under Section 19)</div>
+      <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+        <div style={{ marginBottom: "24px" }}>
+          <h1 style={{ font: "700 1.8rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+            File a First Appeal
+          </h1>
+          <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: 0 }}>
+            Under Section 19(1) of the RTI Act · Zero Statutory Fee
+          </p>
         </div>
 
-        {/* Appeal Form */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)" }}>
-          <div className="form-group">
-            <label style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--gov-navy-950)", marginBottom: "10px", display: "block" }}>
+        <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+          {/* Original RTI Details */}
+          <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "14px", marginBottom: "24px", fontSize: "0.85rem" }}>
+            <div style={{ color: "var(--neutral-500)", fontSize: "0.76rem" }}>Original RTI Reference:</div>
+            <strong style={{ color: "var(--gov-navy-950)" }}>{originalApp.regNo}</strong> — {originalApp.subject}
+            <div style={{ color: "var(--neutral-600)", marginTop: "2px" }}>Authority: {originalApp.publicAuthority} ({originalApp.ministry})</div>
+          </div>
+
+          {/* Reason for Appeal */}
+          <fieldset style={{ border: 0, padding: 0, margin: "0 0 20px" }}>
+            <legend style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--gov-navy-950)", marginBottom: "10px" }}>
               Why are you appealing? <span style={{ color: "#dc2626" }}>*</span>
-            </label>
-            <div style={{ display: "grid", gap: "10px" }}>
+            </legend>
+
+            <div style={{ display: "grid", gap: "8px" }}>
               {[
-                { id: "NO_RESPONSE", label: "No response received within 30 days (Deemed Refusal)" },
-                { id: "INCOMPLETE", label: "Information provided was incomplete or misleading" },
-                { id: "DENIED", label: "Information was improperly denied under exemptions" },
-                { id: "FEE_INCORRECT", label: "Additional photocopy fee requested appears unreasonable" },
-                { id: "OTHER", label: "Other grounds of dissatisfaction" }
-              ].map((r) => (
-                <label key={r.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9375rem", cursor: "pointer" }}>
+                { id: "NO_RESPONSE", label: "No response received within statutory 30 days" },
+                { id: "INCOMPLETE", label: "Information provided was incomplete or evasive" },
+                { id: "DENIED", label: "Information was denied without valid statutory exemption" },
+                { id: "FEE_DISPUTE", label: "Photocopy or calculation fee demanded appears unreasonable" },
+                { id: "OTHER", label: "Other grievance regarding CPIO order" }
+              ].map((opt) => (
+                <label key={opt.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.88rem", cursor: "pointer" }}>
                   <input
                     type="radio"
                     name="appealReason"
-                    checked={appealReason === r.id}
-                    onChange={() => setAppealReason(r.id)}
+                    checked={appealReason === opt.id}
+                    onChange={() => setAppealReason(opt.id)}
                   />
-                  {r.label}
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          <div className="form-group">
-            <label htmlFor="appeal-grounds-text">Grounds of Appeal <span style={{ color: "#dc2626" }}>*</span></label>
-            <div className="form-hint">State clearly why the CPIO&apos;s decision should be overturned or directed.</div>
+          {/* Appeal Grounds Text */}
+          <div style={{ marginBottom: "24px" }}>
+            <label htmlFor="appeal-grounds" style={{ display: "block", fontSize: "0.88rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+              Grounds of Appeal / Specific Grievance <span style={{ color: "#dc2626" }}>*</span>
+            </label>
             <textarea
-              id="appeal-grounds-text"
-              rows={6}
+              id="appeal-grounds"
+              rows={5}
               value={appealGrounds}
               onChange={(e) => setAppealGrounds(e.target.value)}
-              className="form-control"
+              placeholder="State why the CPIO response was unsatisfactory or specify that no response was received within 30 days..."
+              style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.88rem", lineHeight: "1.5" }}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="appeal-attach">Supporting PDF Document (Optional)</label>
-            <input
-              id="appeal-attach"
-              type="file"
-              accept=".pdf"
-              onChange={(e) => setAttachedPdf(e.target.files?.[0]?.name || "")}
-              className="form-control"
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px" }}>
-            <Link href="/appeal" className="btn-secondary-action">
-              ← Cancel
-            </Link>
-            <button type="button" className="btn-primary-action" onClick={handleSubmit}>
-              Submit First Appeal (₹0) →
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "18px", borderTop: "1px solid var(--neutral-200)" }}>
+            <span style={{ fontSize: "0.82rem", color: "var(--forest-700)", fontWeight: 700 }}>
+              Fee: ₹0 (Free Statutory Appeal)
+            </span>
+            <button
+              type="button"
+              className="btn-hero-primary"
+              onClick={handleSubmitAppeal}
+              disabled={isSubmitting || !appealGrounds.trim()}
+            >
+              {isSubmitting ? "Submitting appeal..." : "Submit First Appeal →"}
             </button>
           </div>
         </div>
@@ -155,11 +140,11 @@ function NewAppealWizardContent() {
   );
 }
 
-export default function NewAppealWizardPage() {
+export default function NewFirstAppealPage() {
   return (
     <PortalPage>
-      <Suspense fallback={<div className="wrap" style={{ padding: "40px 0" }}>Loading...</div>}>
-        <NewAppealWizardContent />
+      <Suspense fallback={<div className="wrap" style={{ padding: "40px 0" }}>Loading appeal wizard...</div>}>
+        <AppealForm />
       </Suspense>
     </PortalPage>
   );

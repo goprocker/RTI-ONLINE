@@ -1,12 +1,11 @@
 import { AuthorityItem } from "../types/rti";
-
-export interface PublicAuthorityRecord extends AuthorityItem {
-  commonTopics?: string[];
-}
-
 export type { AuthorityItem };
 
-export const centralAuthorities: PublicAuthorityRecord[] = [
+export interface PublicAuthority extends AuthorityItem {
+  commonTopics: string[];
+}
+
+export const centralAuthorities: AuthorityItem[] = [
   {
     id: "dopt",
     name: "Department of Personnel & Training (DoPT)",
@@ -14,8 +13,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of Personnel and Training",
     category: "Civil Services, Rules & Administration",
     keywords: ["dopt", "service rules", "ias", "ips", "recruitment rules", "central secretariat", "promotion", "seniority", "conduct rules"],
-    nodalOfficerDesc: "RTI Nodal Officer, North Block, New Delhi. Routes requests across Estt, AIS, and Vigilance divisions.",
-    commonTopics: ["Civil services rules", "IAS / IPS cadre", "Recruitment rules", "Central Secretariat seniority"]
+    nodalOfficerDesc: "RTI Nodal Officer, North Block, New Delhi. Routes requests across Estt, AIS, and Vigilance divisions."
   },
   {
     id: "mea-passport",
@@ -24,8 +22,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of External Affairs",
     category: "Passports, Visas & Consular",
     keywords: ["passport", "tatkaal", "rpo", "visa", "embassy", "consular", "passport delay", "police verification passport", "passport renewal"],
-    nodalOfficerDesc: "RTI Cell, CPV Division, Patiala House Annex, New Delhi. Applications routed to Regional Passport Offices (RPOs).",
-    commonTopics: ["Passport issuance", "Tatkaal processing", "Regional Passport Offices (RPO)", "Police verification logs"]
+    nodalOfficerDesc: "RTI Cell, CPV Division, Patiala House Annex, New Delhi. Applications routed to Regional Passport Offices (RPOs)."
   },
   {
     id: "epfo",
@@ -34,8 +31,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Employees Provident Fund Organisation",
     category: "Pensions, PF & Social Security",
     keywords: ["epf", "epfo", "provident fund", "pf claim", "uan", "pf transfer", "pension", "eps", "pf withdrawal", "pf delay"],
-    nodalOfficerDesc: "Central RTI Nodal Cell, Bhavishya Nidhi Bhawan, New Delhi. Forwards to concerned Regional PF Commissioner (RPFC).",
-    commonTopics: ["EPF claim status", "UAN transfer", "Pension (EPS-95)", "Member balance settlement"]
+    nodalOfficerDesc: "Central RTI Nodal Cell, Bhavishya Nidhi Bhawan, New Delhi. Forwards to concerned Regional PF Commissioner (RPFC)."
   },
   {
     id: "cbse",
@@ -44,8 +40,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of School Education & Literacy",
     category: "Education & Examinations",
     keywords: ["cbse", "marksheet", "board exam", "10th certificate", "12th certificate", "re-evaluation", "answer sheet copy", "school affiliation"],
-    nodalOfficerDesc: "RTI Cell, CBSE Headquarters, Preet Vihar, Delhi. Forwards to Regional Offices (Ajmer, Chennai, Delhi, etc.).",
-    commonTopics: ["Evaluated answer sheet copies", "Marksheet verification", "School affiliation rules", "Re-evaluation status"]
+    nodalOfficerDesc: "RTI Cell, CBSE Headquarters, Preet Vihar, Delhi. Forwards to Regional Offices (Ajmer, Chennai, Delhi, etc.)."
   },
   {
     id: "railways-rb",
@@ -54,8 +49,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Railway Board",
     category: "Railways & Transportation",
     keywords: ["railway", "train", "irctc", "ticket refund", "tatkal quota", "railway recruitment", "rrb", "station amenity", "train delay"],
-    nodalOfficerDesc: "RTI Nodal Officer, Rail Bhavan, New Delhi. Automatically distributed to respective Zonal Railways & RRBs.",
-    commonTopics: ["Ticket refund rules", "Tatkal quota allocation", "RRB recruitment logs", "Station amenities expenditure"]
+    nodalOfficerDesc: "RTI Nodal Officer, Rail Bhavan, New Delhi. Automatically distributed to respective Zonal Railways & RRBs."
   },
   {
     id: "nhai",
@@ -64,8 +58,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "National Highways Authority of India",
     category: "Highways, Roads & Infrastructure",
     keywords: ["nhai", "highway", "toll", "fastag", "road construction", "toll plaza fee", "expressway", "land acquisition highway"],
-    nodalOfficerDesc: "RTI Cell, NHAI HQ, Dwarka, New Delhi. Dispatched to Project Implementation Units (PIUs).",
-    commonTopics: ["National highway tenders", "Toll collection data", "FASTag dispute rules", "Highway land acquisition"]
+    nodalOfficerDesc: "RTI Cell, NHAI HQ, Dwarka, New Delhi. Dispatched to Project Implementation Units (PIUs)."
   },
   {
     id: "cbdt",
@@ -74,8 +67,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of Revenue",
     category: "Taxes & Revenue",
     keywords: ["income tax", "tax refund", "pan card", "itr", "cbdt", "tax deduction", "tds refund", "assessment order", "143 notice"],
-    nodalOfficerDesc: "RTI Nodal Officer, North Block & Pr. CCIT RTI Cells nationwide.",
-    commonTopics: ["Income tax refund status", "TDS credit mismatch", "Assessment orders", "PAN database verification"]
+    nodalOfficerDesc: "RTI Nodal Officer, North Block & Pr. CCIT RTI Cells nationwide."
   },
   {
     id: "upsc",
@@ -84,8 +76,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Apex Body",
     category: "Recruitment & Examinations",
     keywords: ["upsc", "civil services exam", "cse", "nda", "cds", "cut off", "marksheet upsc", "interview marks", "answer key upsc"],
-    nodalOfficerDesc: "RTI Cell, Dholpur House, Shahjahan Road, New Delhi.",
-    commonTopics: ["Civil Services cut-off marks", "NDA / CDS answer keys", "Interview evaluation logs", "Recruitment notifications"]
+    nodalOfficerDesc: "RTI Cell, Dholpur House, Shahjahan Road, New Delhi."
   },
   {
     id: "mha",
@@ -94,8 +85,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Ministry of Home Affairs",
     category: "Internal Security & Police",
     keywords: ["mha", "home affairs", "citizenship", "fcra", "central armed police", "crpf", "bsf", "cisf", "delhi police", "border security"],
-    nodalOfficerDesc: "RTI Nodal Section, North Block, New Delhi.",
-    commonTopics: ["Citizenship certificate records", "FCRA NGO compliance", "Central Armed Police (CAPF) rules", "Border security schemes"]
+    nodalOfficerDesc: "RTI Nodal Section, North Block, New Delhi."
   },
   {
     id: "rbi",
@@ -104,8 +94,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Reserve Bank of India",
     category: "Banking & Financial Regulation",
     keywords: ["rbi", "bank", "reserve bank", "banking ombudsman", "currency", "bank fraud policy", "repo rate", "credit score cibil rules"],
-    nodalOfficerDesc: "RTI Division, Central Office Building, Shahid Bhagat Singh Marg, Mumbai.",
-    commonTopics: ["Banking Ombudsman orders", "Bank inspection reports", "Credit bureau regulations", "Defaulter list guidelines"]
+    nodalOfficerDesc: "RTI Division, Central Office Building, Shahid Bhagat Singh Marg, Mumbai."
   },
   {
     id: "indiapost",
@@ -114,8 +103,7 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of Posts",
     category: "Postal & Parcels",
     keywords: ["speed post", "postal", "post office", "tracking post", "post parcel", "postal savings", "mis", "rd post office"],
-    nodalOfficerDesc: "RTI Nodal Officer, Dak Bhawan, Sansad Marg, New Delhi.",
-    commonTopics: ["Speed Post tracking logs", "Post Office Savings Bank", "Postal Insurance (PLI)", "Parcel loss compensation"]
+    nodalOfficerDesc: "RTI Nodal Officer, Dak Bhawan, Sansad Marg, New Delhi."
   },
   {
     id: "aiims-delhi",
@@ -124,15 +112,12 @@ export const centralAuthorities: PublicAuthorityRecord[] = [
     department: "Department of Health & Family Welfare",
     category: "Health & Medical Institutions",
     keywords: ["aiims", "medical", "hospital", "aiims admission", "ini-cet", "health ministry", "opd waiting", "medical records"],
-    nodalOfficerDesc: "RTI Cell, AIIMS, Ansari Nagar, New Delhi.",
-    commonTopics: ["Medical entrance (INI-CET) cut-offs", "Hospital procurement tenders", "OPD appointment records"]
+    nodalOfficerDesc: "RTI Cell, AIIMS, Ansari Nagar, New Delhi."
   }
 ];
 
-export const publicAuthoritiesDatabase = centralAuthorities;
-
 export interface SearchMatchResult {
-  authority: PublicAuthorityRecord;
+  authority: AuthorityItem;
   score: number;
   matchedReason: string;
 }
@@ -195,3 +180,9 @@ export function findMatchingAuthorities(query: string): SearchMatchResult[] {
   results.sort((a, b) => b.score - a.score);
   return results;
 }
+
+export const centralPublicAuthorities: PublicAuthority[] = centralAuthorities.map((a) => ({
+  ...a,
+  commonTopics: a.keywords.slice(0, 4).map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+}));
+

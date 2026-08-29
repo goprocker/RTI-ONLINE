@@ -1,194 +1,114 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PortalPage } from "../../../components/portal-shell";
-import { publicAuthoritiesDatabase, PublicAuthorityRecord } from "../../../lib/authorities-data";
+import { centralPublicAuthorities, findMatchingAuthorities, PublicAuthority } from "../../../lib/authorities-data";
 import { useAuth } from "../../../lib/auth-context";
 
-function NewRTIWizardContent() {
-  const router = useRouter();
+function RequestWizard() {
   const searchParams = useSearchParams();
-  const authorityParam = searchParams.get("authority");
-  const queryParam = searchParams.get("query");
+  const authorityParam = searchParams.get("authority") || "";
+  const queryParam = searchParams.get("query") || "";
 
-  const { user, addApplication } = useAuth();
+  const { user } = useAuth();
 
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Step 1: Authority
   const [selectedAuthorityId, setSelectedAuthorityId] = useState<string>(authorityParam || "auth-mea");
-  const [authoritySearch, setAuthoritySearch] = useState<string>("");
+  const [authSearch, setAuthSearch] = useState<string>("");
 
   // Step 2: Request
-  const [subject, setSubject] = useState<string>("Status and inspection notes of pending application");
-  const [requestText, setRequestText] = useState<string>(
-    queryParam
-      ? `Regarding: ${queryParam}\n\nPlease provide official records under Section 6(1) of the RTI Act:\n1. Current processing status and file movement log.\n2. Certified copy of internal scrutiny notesheet.`
-      : ""
-  );
-  const [attachedFileName, setAttachedFileName] = useState<string>("");
-  const [showWritingTips, setShowWritingTips] = useState<boolean>(false);
+  const [subject, setSubject] = useState(queryParam || "");
+  const [queryText, setQueryText] = useState("");
+  const [attachedDocName, setAttachedDocName] = useState<string | null>(null);
+  const [showAdvice, setShowAdvice] = useState(false);
 
   // Step 3: Applicant Details
-  const [applicantName, setApplicantName] = useState<string>(user?.name || "Rajesh Sharma");
-  const [gender, setGender] = useState<string>(user?.gender || "Male");
-  const [address, setAddress] = useState<string>(user?.address || "Flat 402, Kaveri Apartments, Indiranagar, Bengaluru");
-  const [pincode, setPincode] = useState<string>(user?.pincode || "560038");
-  const [state, setState] = useState<string>(user?.state || "Karnataka");
-  const [mobile, setMobile] = useState<string>(user?.mobile || "9876543210");
-  const [email, setEmail] = useState<string>(user?.email || "rajesh.sharma@example.gov.in");
-  const [isBPL, setIsBPL] = useState<boolean>(false);
-  const [bplCardNo, setBplCardNo] = useState<string>("");
+  const [applicantName, setApplicantName] = useState(user?.name || "Rajesh Sharma");
+  const [applicantEmail, setApplicantEmail] = useState(user?.email || "rajesh.sharma@example.gov.in");
+  const [applicantMobile, setApplicantMobile] = useState(user?.mobile || "9876543210");
+  const [applicantAddress, setApplicantAddress] = useState(user?.address || "Flat 402, Kaveri Apartments, Indiranagar, Bengaluru - 560038");
+  const [isBPL, setIsBPL] = useState(false);
+  const [bplCertName, setBplCertName] = useState<string | null>(null);
 
-  // Step 4: Payment Simulation
-  const [paymentMode, setPaymentMode] = useState<"UPI" | "DEBIT" | "NET_BANKING">("UPI");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  const [generatedRegNo, setGeneratedRegNo] = useState<string>("");
+  // Step 4: Payment & Submit
+  const [paymentMethod, setPaymentMethod] = useState<"UPI" | "DEBIT" | "NETBANKING">("UPI");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRegNo, setSubmittedRegNo] = useState<string | null>(null);
 
   useEffect(() => {
     if (authorityParam) {
       setSelectedAuthorityId(authorityParam);
     }
-  }, [authorityParam]);
-
-  const selectedAuth = publicAuthoritiesDatabase.find((a) => a.id === selectedAuthorityId) || publicAuthoritiesDatabase[0];
-
-  // Privacy Check (Detects 12-digit Aadhaar or 10-digit PAN format)
-  const aadhaarRegex = /\b\d{4}\s?\d{4}\s?\d{4}\b/;
-  const panRegex = /\b[A-Z]{5}[0-9]{4}[A-Z]{1}\b/;
-  const hasAadhaar = aadhaarRegex.test(requestText);
-  const hasPAN = panRegex.test(requestText);
-
-  function handleNext() {
-    if (currentStep === 1 && !selectedAuthorityId) {
-      alert("Please select a Public Authority.");
-      return;
+    if (queryParam && !subject) {
+      setSubject(queryParam);
     }
-    if (currentStep === 2) {
-      if (!subject.trim() || !requestText.trim()) {
-        alert("Please enter a subject and describe your request.");
-        return;
-      }
-    }
-    if (currentStep === 3) {
-      if (!applicantName.trim() || !mobile.trim() || !email.trim()) {
-        alert("Please complete the required applicant contact fields.");
-        return;
-      }
-    }
-    setCurrentStep((prev) => (prev + 1) as any);
-  }
+  }, [authorityParam, queryParam, subject]);
 
-  function handleBack() {
-    setCurrentStep((prev) => (prev - 1) as any);
-  }
+  const selectedAuthority = centralPublicAuthorities.find((a) => a.id === selectedAuthorityId) || centralPublicAuthorities[0];
 
-  function handleFinalSubmit() {
+  // Privacy Audit: Check if query contains Aadhaar (12 digits) or PAN pattern
+  const hasAadhaarPattern = /\b\d{4}\s?\d{4}\s?\d{4}\b/.test(queryText);
+  const hasPanPattern = /\b[A-Z]{5}[0-9]{4}[A-Z]{1}\b/i.test(queryText);
+
+  // Search filtered authorities for Step 1
+  const authorityList = authSearch.trim()
+    ? findMatchingAuthorities(authSearch).map((r) => r.authority)
+    : centralPublicAuthorities;
+
+  function handleSubmit() {
     setIsSubmitting(true);
     setTimeout(() => {
-      const reg = `DOPT/R/2026/${Math.floor(10000 + Math.random() * 90000)}`;
-      setGeneratedRegNo(reg);
-
-      addApplication({
-        regNo: reg,
-        subject: subject,
-        ministry: selectedAuth.ministry,
-        department: selectedAuth.name,
-        filingDate: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-        expectedDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-        status: "SUBMITTED",
-        statusLabel: "Submitted · Awaiting Nodal Assignment",
-        remainingDays: 30,
-        feePaid: isBPL ? 0 : 10,
-        paymentRef: isBPL ? "BPL_EXEMPTION" : `PAY_UPI_${Math.floor(100000 + Math.random() * 900000)}`,
-        applicantName,
-        applicantEmail: email,
-        applicantMobile: mobile,
-        applicantAddress: address,
-        isBPL,
-        queryText: requestText,
-        attachedDocName: attachedFileName || undefined,
-        currentStageText: "File received electronically. Nodal officer will review jurisdiction and assign to concerned CPIO within 5 working days.",
-        timeline: [
-          {
-            stage: "Application Submitted",
-            date: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-            desc: "Request filed online and payment reconciled.",
-            completed: true
-          },
-          {
-            stage: "Nodal Scrutiny",
-            date: "Expected in 5 days",
-            desc: "Nodal Officer verifies jurisdiction and assigns to CPIO.",
-            completed: false
-          },
-          {
-            stage: "CPIO Processing",
-            date: "Expected in 20 days",
-            desc: "CPIO retrieves official files and prepares response.",
-            completed: false
-          },
-          {
-            stage: "Response Issued",
-            date: "Statutory limit: 30 days",
-            desc: "Official reply furnished to citizen.",
-            completed: false
-          }
-        ]
-      });
-
       setIsSubmitting(false);
-      setIsCompleted(true);
+      setSubmittedRegNo("DOPT/R/2026/04812");
     }, 1200);
   }
 
-  if (isCompleted) {
+  if (submittedRegNo) {
     return (
-      <main className="wrap" style={{ padding: "40px 20px 80px" }}>
-        <div className="form-wrap">
-          {/* Confirmation Panel (GOV.UK Style) */}
-          <div style={{ background: "var(--success-50)", border: "2px solid var(--success-600)", borderRadius: "var(--radius-lg)", padding: "32px 28px", textAlign: "center", marginBottom: "28px" }}>
-            <h1 style={{ fontSize: "1.75rem", color: "var(--success-700)", margin: "0 0 8px" }}>
-              Application submitted
+      <main className="wrap" style={{ padding: "48px 0 80px" }}>
+        <div style={{ maxWidth: "640px", margin: "0 auto", background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "36px", boxShadow: "var(--shadow-md)" }}>
+          <div style={{ borderBottom: "1px solid var(--neutral-200)", paddingBottom: "20px", marginBottom: "24px" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--forest-700)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Application Submitted Successfully
+            </span>
+            <h1 style={{ font: "700 1.8rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "4px 0 6px" }}>
+              RTI Registration Number
             </h1>
-            <p style={{ fontSize: "1rem", color: "var(--neutral-700)", margin: "0 0 16px" }}>
-              Your RTI application has been received by the Public Authority.
-            </p>
-            <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)", padding: "14px 20px", display: "inline-block" }}>
-              <span style={{ fontSize: "0.8125rem", color: "var(--neutral-500)", display: "block", textTransform: "uppercase" }}>
-                Registration Number
-              </span>
-              <strong style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", fontFamily: "var(--font-number)" }}>
-                {generatedRegNo}
-              </strong>
+            <div style={{ fontSize: "1.4rem", fontWeight: 800, fontFamily: "var(--font-number)", color: "var(--gov-navy-900)", background: "var(--neutral-100)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "inline-block" }}>
+              {submittedRegNo}
             </div>
-            <p style={{ fontSize: "0.8125rem", color: "var(--neutral-600)", marginTop: "12px", marginBottom: 0 }}>
-              We have sent a confirmation email and SMS to <strong>{email}</strong>.
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.85rem", margin: "10px 0 0" }}>
+              An SMS and Email acknowledgment has been dispatched to <strong>{applicantEmail}</strong>.
             </p>
           </div>
 
-          {/* What Happens Next */}
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "24px", marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "1.125rem", color: "var(--gov-navy-950)", margin: "0 0 12px" }}>
-              What happens next
+          <div style={{ marginBottom: "28px" }}>
+            <h2 style={{ font: "700 1.1rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 10px" }}>
+              What happens next?
             </h2>
-            <ol style={{ margin: 0, paddingLeft: "20px", display: "grid", gap: "10px", fontSize: "0.875rem", color: "var(--neutral-700)", lineHeight: "1.5" }}>
-              <li>The Ministry Nodal Officer will verify jurisdiction and assign your file to the concerned CPIO.</li>
-              <li>The CPIO must furnish a response within the statutory 30-day window.</li>
-              <li>If you do not receive a response or are dissatisfied, you can file a First Appeal at zero fee.</li>
+            <ol style={{ margin: 0, paddingLeft: "18px", fontSize: "0.88rem", color: "var(--neutral-700)", display: "grid", gap: "8px", lineHeight: "1.5" }}>
+              <li>Your application will reach the Nodal Officer of <strong>{selectedAuthority.name}</strong>.</li>
+              <li>The file will be assigned to the concerned Central Public Information Officer (CPIO).</li>
+              <li>Under Section 7(1), a statutory response will be issued within <strong>30 days</strong>.</li>
+              <li>You can view status updates or download the final signed response order on your dashboard.</li>
             </ol>
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <Link href="/dashboard" className="btn-primary-action" style={{ padding: "10px 18px" }}>
-              View in My Requests →
+            <Link href="/dashboard" className="btn-file-primary">
+              View in citizen dashboard →
             </Link>
-            <Link href="/" className="btn-secondary-action" style={{ padding: "10px 18px" }}>
-              Return to Home
-            </Link>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              style={{ padding: "8px 16px", background: "var(--neutral-100)", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-md)", fontSize: "0.84rem", fontWeight: 600, cursor: "pointer" }}
+            >
+              Print Receipt (PDF)
+            </button>
           </div>
         </div>
       </main>
@@ -196,7 +116,7 @@ function NewRTIWizardContent() {
   }
 
   return (
-    <main className="wrap" style={{ padding: "40px 20px 80px" }}>
+    <main className="wrap" style={{ padding: "36px 0 80px" }}>
       <div className="bread">
         <Link href="/">Home</Link>
         <span>›</span>
@@ -205,337 +125,438 @@ function NewRTIWizardContent() {
         <span>File an RTI</span>
       </div>
 
-      <div className="form-wrap">
-        {/* USWDS Accessible Step Indicator */}
-        <ol className="usa-step-indicator" aria-label="Application Progress">
-          <li className={`usa-step-item ${currentStep === 1 ? "active" : currentStep > 1 ? "completed" : ""}`}>
-            <div className="usa-step-circle">{currentStep > 1 ? "✓" : "1"}</div>
-            <span className="usa-step-label">1. Authority</span>
-          </li>
-          <li className={`usa-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
-            <div className="usa-step-circle">{currentStep > 2 ? "✓" : "2"}</div>
-            <span className="usa-step-label">2. Request</span>
-          </li>
-          <li className={`usa-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
-            <div className="usa-step-circle">{currentStep > 3 ? "✓" : "3"}</div>
-            <span className="usa-step-label">3. Details</span>
-          </li>
-          <li className={`usa-step-item ${currentStep === 4 ? "active" : ""}`}>
-            <div className="usa-step-circle">4</div>
-            <span className="usa-step-label">4. Review</span>
-          </li>
-        </ol>
+      <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+        {/* USWDS Accessible 4-Step Indicator */}
+        <nav aria-label="Application Progress" style={{ marginBottom: "32px" }}>
+          <ol style={{ display: "flex", listStyle: "none", margin: 0, padding: 0, justifyContent: "space-between", borderBottom: "2px solid var(--neutral-200)", paddingBottom: "12px" }}>
+            {[
+              { num: 1, label: "Authority" },
+              { num: 2, label: "Request" },
+              { num: 3, label: "Details" },
+              { num: 4, label: "Review & Submit" }
+            ].map((s) => {
+              const isCurrent = step === s.num;
+              const isPast = step > s.num;
+              return (
+                <li key={s.num} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      borderRadius: "var(--radius-full)",
+                      background: isCurrent ? "var(--gov-navy-900)" : isPast ? "var(--forest-700)" : "var(--neutral-300)",
+                      color: "#ffffff",
+                      fontSize: "0.75rem",
+                      fontWeight: 800,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
+                    }}
+                  >
+                    {isPast ? "✓" : s.num}
+                  </span>
+                  <span style={{ fontSize: "0.84rem", fontWeight: isCurrent ? 700 : 500, color: isCurrent ? "var(--gov-navy-950)" : "var(--neutral-600)" }}>
+                    {s.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
 
-        {/* SCREEN 1: WHERE SHOULD WE SEND YOUR REQUEST? */}
-        {currentStep === 1 && (
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)" }}>
-            <h1 style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+        {/* STEP 1: WHERE SHOULD WE SEND YOUR REQUEST? */}
+        {step === 1 && (
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            <h1 style={{ font: "700 1.6rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
               Where should we send your request?
             </h1>
-            <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
-              Select the Central Government ministry, department, or public authority that holds the records.
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: "0 0 20px" }}>
+              Select the Central Ministry, Department, or Autonomous Body that holds the records.
             </p>
 
-            <div className="form-group">
-              <label htmlFor="auth-filter-input">Filter Public Authorities</label>
+            <div style={{ marginBottom: "18px" }}>
+              <label htmlFor="authority-search" style={{ display: "block", fontSize: "0.88rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                Search public authority
+              </label>
               <input
-                id="auth-filter-input"
+                id="authority-search"
                 type="text"
-                value={authoritySearch}
-                onChange={(e) => setAuthoritySearch(e.target.value)}
-                placeholder="Type to filter (e.g. Passport, EPFO, Railways, Education)..."
-                className="form-control"
+                value={authSearch}
+                onChange={(e) => setAuthSearch(e.target.value)}
+                placeholder="Type department name (e.g. Passport, CBSE, EPFO, Revenue)..."
+                style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="auth-select">Selected Public Authority <span style={{ color: "#dc2626" }}>*</span></label>
-              <select
-                id="auth-select"
-                value={selectedAuthorityId}
-                onChange={(e) => setSelectedAuthorityId(e.target.value)}
-                className="form-control"
-              >
-                {publicAuthoritiesDatabase
-                  .filter((a) => !authoritySearch || a.name.toLowerCase().includes(authoritySearch.toLowerCase()) || a.ministry.toLowerCase().includes(authoritySearch.toLowerCase()))
-                  .map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.ministry})
-                    </option>
-                  ))}
-              </select>
+            <div style={{ maxHeight: "240px", overflowY: "auto", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", marginBottom: "20px" }}>
+              {authorityList.map((auth: any) => (
+                <label
+                  key={auth.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                    padding: "10px 14px",
+                    borderBottom: "1px solid var(--neutral-100)",
+                    cursor: "pointer",
+                    background: selectedAuthorityId === auth.id ? "var(--neutral-100)" : "#ffffff"
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="authorityRadio"
+                    checked={selectedAuthorityId === auth.id}
+                    onChange={() => setSelectedAuthorityId(auth.id)}
+                    style={{ marginTop: "3px" }}
+                  />
+                  <div>
+                    <strong style={{ fontSize: "0.88rem", color: "var(--gov-navy-950)", display: "block" }}>{auth.name}</strong>
+                    <span style={{ fontSize: "0.78rem", color: "var(--neutral-500)" }}>{auth.ministry}</span>
+                  </div>
+                </label>
+              ))}
             </div>
 
-            {selectedAuth && (
-              <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", padding: "14px 16px", marginTop: "16px", fontSize: "0.875rem" }}>
-                <strong style={{ color: "var(--gov-navy-950)", display: "block", marginBottom: "4px" }}>
-                  Routing details:
-                </strong>
-                <p style={{ margin: 0, color: "var(--neutral-600)", lineHeight: "1.4" }}>
-                  {selectedAuth.nodalOfficerDesc}
-                </p>
-              </div>
-            )}
+            <div style={{ background: "var(--neutral-50)", borderLeft: "3px solid var(--gov-navy-900)", padding: "12px 14px", fontSize: "0.82rem", color: "var(--neutral-700)" }}>
+              <strong>Routing path: </strong>{selectedAuthority.nodalOfficerDesc}
+            </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "28px" }}>
-              <button type="button" className="btn-primary-action" onClick={handleNext}>
-                Continue →
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "28px", paddingTop: "16px", borderTop: "1px solid var(--neutral-200)" }}>
+              <button
+                type="button"
+                className="btn-hero-primary"
+                onClick={() => setStep(2)}
+              >
+                Continue (2 of 4) →
               </button>
             </div>
           </div>
         )}
 
-        {/* SCREEN 2: WHAT INFORMATION DO YOU NEED? */}
-        {currentStep === 2 && (
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)" }}>
-            <h1 style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+        {/* STEP 2: WHAT INFORMATION DO YOU NEED? */}
+        {step === 2 && (
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            <h1 style={{ font: "700 1.6rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
               What information do you need?
             </h1>
-            <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
-              Be specific about the documents, circulars, or records you are requesting.
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: "0 0 20px" }}>
+              Recipient: <strong>{selectedAuthority.name}</strong>
             </p>
 
-            <div className="form-group">
-              <label htmlFor="request-subject">Subject <span style={{ color: "#dc2626" }}>*</span></label>
+            <div style={{ marginBottom: "18px" }}>
+              <label htmlFor="subject-input" style={{ display: "block", fontSize: "0.88rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                Subject / Summary of Request <span style={{ color: "#dc2626" }}>*</span>
+              </label>
               <input
-                id="request-subject"
+                id="subject-input"
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="e.g. Certified copy of inspection report"
-                className="form-control"
+                placeholder="e.g. Certified copy of passport verification report and dispatch log"
+                style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
               />
             </div>
 
-            <div className="form-group">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <label htmlFor="request-body">Description of records <span style={{ color: "#dc2626" }}>*</span></label>
-                <span style={{ fontSize: "0.75rem", color: requestText.length > 3000 ? "#dc2626" : "var(--neutral-500)" }}>
-                  {requestText.length} of 3,000 characters
+            <div style={{ marginBottom: "18px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                <label htmlFor="query-textarea" style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--gov-navy-950)" }}>
+                  Specific Questions / Information Requested <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <span style={{ fontSize: "0.78rem", color: queryText.length > 3000 ? "#dc2626" : "var(--neutral-500)" }}>
+                  {queryText.length} / 3,000 characters
                 </span>
               </div>
-              <div className="form-hint">
-                You can attach a supporting PDF below if you need more space.
-              </div>
               <textarea
-                id="request-body"
+                id="query-textarea"
                 rows={7}
-                value={requestText}
-                onChange={(e) => setRequestText(e.target.value)}
-                placeholder="1. Status of application number XXXXX.\n2. Certified copy of internal file notesheets."
-                className="form-control"
+                value={queryText}
+                onChange={(e) => setQueryText(e.target.value)}
+                placeholder="Please provide numbered, specific questions (e.g. 1. Certified copy of file note... 2. Dispatch date of file...)"
+                style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem", lineHeight: "1.5" }}
               />
             </div>
 
-            {/* Subtle Writing Assistant (Clean & Non-Intrusive) */}
-            <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", padding: "14px 16px", marginBottom: "20px" }}>
+            {/* Subtle Writing Assistant (No Purple AI Slop) */}
+            <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "12px 14px", marginBottom: "18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--neutral-800)" }}>
+                <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--neutral-700)" }}>
                   Need help making your request clearer?
                 </span>
                 <button
                   type="button"
-                  onClick={() => setShowWritingTips(!showWritingTips)}
-                  style={{ background: "none", border: "none", color: "var(--gov-blue-600)", fontWeight: 600, fontSize: "0.8125rem", cursor: "pointer", padding: 0 }}
+                  onClick={() => setShowAdvice(!showAdvice)}
+                  style={{ background: "transparent", border: 0, color: "var(--gov-blue-600)", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}
                 >
-                  {showWritingTips ? "Hide suggestions" : "Check my request"}
+                  {showAdvice ? "Hide tips" : "Check suggestions"}
                 </button>
               </div>
 
-              {showWritingTips && (
-                <div style={{ marginTop: "12px", borderTop: "1px solid var(--neutral-200)", paddingTop: "10px", fontSize: "0.8125rem", color: "var(--neutral-700)" }}>
-                  <div style={{ fontWeight: 600, marginBottom: "6px" }}>Suggestions for effective RTI requests:</div>
-                  <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "4px" }}>
-                    <li>Ask for specific official records (e.g. <em>&quot;certified copy of notesheet&quot;</em>) rather than asking <em>&quot;why&quot;</em> something happened.</li>
-                    <li>Include relevant dates and inward reference numbers.</li>
-                    <li>Avoid asking for opinions or hypothetical interpretations.</li>
-                  </ul>
-                </div>
+              {showAdvice && (
+                <ul style={{ margin: "10px 0 0", paddingLeft: "16px", fontSize: "0.8rem", color: "var(--neutral-600)", display: "grid", gap: "4px" }}>
+                  <li>Ask for specific official records or documents rather than asking open-ended &quot;why&quot; questions.</li>
+                  <li>Include your application reference number or date if asking about a specific transaction.</li>
+                  <li>Keep questions numbered so the CPIO can answer each point directly.</li>
+                </ul>
               )}
             </div>
 
-            {/* Supporting Document */}
-            <div className="form-group">
-              <label htmlFor="attach-pdf">Supporting PDF Document (Optional)</label>
-              <div className="form-hint">Upload receipt, identity proof, or previous correspondence (max 5 MB).</div>
+            {/* Supporting Document Upload */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "0.84rem", fontWeight: 600, color: "var(--neutral-700)", marginBottom: "4px" }}>
+                Attach Supporting Document (Optional PDF, max 1MB)
+              </label>
               <input
-                id="attach-pdf"
                 type="file"
                 accept=".pdf"
-                onChange={(e) => setAttachedFileName(e.target.files?.[0]?.name || "")}
-                className="form-control"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setAttachedDocName(e.target.files[0].name);
+                  }
+                }}
+                style={{ fontSize: "0.82rem" }}
               />
-              {attachedFileName && (
-                <div style={{ fontSize: "0.8125rem", color: "var(--gov-blue-600)", marginTop: "4px" }}>
-                  Attached: {attachedFileName}
+              {attachedDocName && (
+                <div style={{ fontSize: "0.78rem", color: "var(--forest-700)", marginTop: "4px" }}>
+                  ✓ Attached: {attachedDocName}
                 </div>
               )}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px" }}>
-              <button type="button" className="btn-secondary-action" onClick={handleBack}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px", paddingTop: "16px", borderTop: "1px solid var(--neutral-200)" }}>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                style={{ background: "transparent", border: "1px solid var(--neutral-300)", padding: "8px 16px", borderRadius: "var(--radius-md)", fontSize: "0.84rem", fontWeight: 600, cursor: "pointer" }}
+              >
                 ← Back
               </button>
-              <button type="button" className="btn-primary-action" onClick={handleNext}>
-                Continue →
+              <button
+                type="button"
+                className="btn-hero-primary"
+                disabled={!subject.trim() || !queryText.trim()}
+                onClick={() => setStep(3)}
+              >
+                Continue (3 of 4) →
               </button>
             </div>
           </div>
         )}
 
-        {/* SCREEN 3: YOUR DETAILS */}
-        {currentStep === 3 && (
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)" }}>
-            <h1 style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-              Your details
+        {/* STEP 3: YOUR DETAILS */}
+        {step === 3 && (
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            <h1 style={{ font: "700 1.6rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+              Your contact details
             </h1>
-            <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
-              Public authorities require applicant particulars to transmit statutory replies and notices.
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: "0 0 20px" }}>
+              Required for official communication, SMS alerts, and postal dispatch of certified records.
             </p>
 
-            <div className="form-row-2">
-              <div className="form-group">
-                <label htmlFor="name-input">Full Name <span style={{ color: "#dc2626" }}>*</span></label>
-                <input id="name-input" type="text" value={applicantName} onChange={(e) => setApplicantName(e.target.value)} className="form-control" />
+            <div style={{ display: "grid", gap: "16px" }}>
+              <div>
+                <label htmlFor="app-name" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                  Full Name <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <input
+                  id="app-name"
+                  type="text"
+                  value={applicantName}
+                  onChange={(e) => setApplicantName(e.target.value)}
+                  style={{ width: "100%", padding: "9px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
+                />
               </div>
-              <div className="form-group">
-                <label htmlFor="gender-select">Gender</label>
-                <select id="gender-select" value={gender} onChange={(e) => setGender(e.target.value)} className="form-control">
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Third Gender</option>
-                </select>
-              </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="addr-input">Postal Address for Receiving Reply <span style={{ color: "#dc2626" }}>*</span></label>
-              <input id="addr-input" type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="form-control" />
-            </div>
-
-            <div className="form-row-2">
-              <div className="form-group">
-                <label htmlFor="pin-input">PIN Code <span style={{ color: "#dc2626" }}>*</span></label>
-                <input id="pin-input" type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} className="form-control" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="state-input">State / UT <span style={{ color: "#dc2626" }}>*</span></label>
-                <input id="state-input" type="text" value={state} onChange={(e) => setState(e.target.value)} className="form-control" />
-              </div>
-            </div>
-
-            <div className="form-row-2">
-              <div className="form-group">
-                <label htmlFor="mobile-input">Mobile Number <span style={{ color: "#dc2626" }}>*</span></label>
-                <input id="mobile-input" type="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} className="form-control" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email-input">Email Address <span style={{ color: "#dc2626" }}>*</span></label>
-                <input id="email-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-control" />
-              </div>
-            </div>
-
-            {/* BPL Exemption */}
-            <div style={{ borderTop: "1px solid var(--neutral-200)", paddingTop: "16px", marginTop: "16px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.9375rem", cursor: "pointer" }}>
-                <input type="checkbox" checked={isBPL} onChange={(e) => setIsBPL(e.target.checked)} />
-                <span>Below Poverty Line (BPL) citizen (₹0 fee waiver under Section 7(5))</span>
-              </label>
-
-              {isBPL && (
-                <div className="form-group" style={{ marginTop: "12px" }}>
-                  <label htmlFor="bpl-card-no">BPL / Ration Card Number <span style={{ color: "#dc2626" }}>*</span></label>
-                  <input id="bpl-card-no" type="text" value={bplCardNo} onChange={(e) => setBplCardNo(e.target.value)} placeholder="e.g. BPL-KA-991823" className="form-control" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label htmlFor="app-email" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                    Email Address <span style={{ color: "#dc2626" }}>*</span>
+                  </label>
+                  <input
+                    id="app-email"
+                    type="email"
+                    value={applicantEmail}
+                    onChange={(e) => setApplicantEmail(e.target.value)}
+                    style={{ width: "100%", padding: "9px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
+                  />
                 </div>
-              )}
+                <div>
+                  <label htmlFor="app-mobile" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                    Mobile Number <span style={{ color: "#dc2626" }}>*</span>
+                  </label>
+                  <input
+                    id="app-mobile"
+                    type="tel"
+                    value={applicantMobile}
+                    onChange={(e) => setApplicantMobile(e.target.value)}
+                    style={{ width: "100%", padding: "9px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="app-addr" style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "4px" }}>
+                  Postal Address for Receiving Reply <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <input
+                  id="app-addr"
+                  type="text"
+                  value={applicantAddress}
+                  onChange={(e) => setApplicantAddress(e.target.value)}
+                  style={{ width: "100%", padding: "9px 12px", border: "1.5px solid var(--neutral-300)", borderRadius: "var(--radius-sm)", fontSize: "0.9rem" }}
+                />
+              </div>
+
+              {/* BPL Exemption Checkbox */}
+              <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "14px", marginTop: "8px" }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", fontSize: "0.88rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={isBPL}
+                    onChange={(e) => setIsBPL(e.target.checked)}
+                    style={{ marginTop: "3px" }}
+                  />
+                  <div>
+                    <strong style={{ color: "var(--gov-navy-950)", display: "block" }}>Below Poverty Line (BPL) Fee Exemption</strong>
+                    <span style={{ fontSize: "0.78rem", color: "var(--neutral-600)" }}>
+                      Under RTI Rules, citizens holding valid BPL cards pay ₹0 application fee.
+                    </span>
+                  </div>
+                </label>
+
+                {isBPL && (
+                  <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid var(--neutral-200)" }}>
+                    <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "var(--neutral-700)", marginBottom: "4px" }}>
+                      Upload BPL Card / Certificate (PDF/Image)
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setBplCertName(e.target.files[0].name);
+                        }
+                      }}
+                      style={{ fontSize: "0.8rem" }}
+                    />
+                    {bplCertName && (
+                      <span style={{ fontSize: "0.76rem", color: "var(--forest-700)", display: "block", marginTop: "2px" }}>
+                        ✓ {bplCertName}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px" }}>
-              <button type="button" className="btn-secondary-action" onClick={handleBack}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px", paddingTop: "16px", borderTop: "1px solid var(--neutral-200)" }}>
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                style={{ background: "transparent", border: "1px solid var(--neutral-300)", padding: "8px 16px", borderRadius: "var(--radius-md)", fontSize: "0.84rem", fontWeight: 600, cursor: "pointer" }}
+              >
                 ← Back
               </button>
-              <button type="button" className="btn-primary-action" onClick={handleNext}>
-                Continue to review →
+              <button
+                type="button"
+                className="btn-hero-primary"
+                onClick={() => setStep(4)}
+              >
+                Review & submit (4 of 4) →
               </button>
             </div>
           </div>
         )}
 
-        {/* SCREEN 4: CHECK AND SUBMIT */}
-        {currentStep === 4 && (
-          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", padding: "28px", boxShadow: "var(--shadow-sm)" }}>
-            <h1 style={{ fontSize: "1.5rem", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
-              Check and submit
+        {/* STEP 4: CHECK AND SUBMIT */}
+        {step === 4 && (
+          <div style={{ background: "#ffffff", border: "1px solid var(--neutral-300)", borderRadius: "var(--radius-lg)", padding: "32px", boxShadow: "var(--shadow-sm)" }}>
+            <h1 style={{ font: "700 1.6rem var(--font-serif)", color: "var(--gov-navy-950)", margin: "0 0 6px" }}>
+              Check and submit your request
             </h1>
-            <p style={{ fontSize: "0.875rem", color: "var(--neutral-600)", margin: "0 0 20px" }}>
-              Review your details before payment and submission.
+            <p style={{ color: "var(--neutral-600)", fontSize: "0.9rem", margin: "0 0 20px" }}>
+              Please review your application summary before confirming submission.
             </p>
 
-            {/* Privacy & Quality Audit Warning */}
-            {(hasAadhaar || hasPAN) && (
-              <div className="gov-alert gov-alert-warning" style={{ marginBottom: "20px" }}>
-                <strong>Privacy suggestion:</strong> Your request appears to contain an Aadhaar or PAN number. Public RTI responses may be published on disclosure logs. Consider removing sensitive personal identifiers if not strictly required.
+            {/* PRE-SUBMISSION QUALITY & PRIVACY AUDIT */}
+            {(hasAadhaarPattern || hasPanPattern) && (
+              <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: "var(--radius-sm)", padding: "12px 16px", marginBottom: "20px", fontSize: "0.84rem" }}>
+                <strong style={{ color: "#92400e", display: "block", marginBottom: "2px" }}>
+                  Privacy suggestion:
+                </strong>
+                <span style={{ color: "#78350f" }}>
+                  Your request appears to contain sensitive personal identifiers (Aadhaar or PAN number). RTI responses are public records. Consider masking or removing personal identifiers unless strictly necessary.
+                </span>
               </div>
             )}
 
             {/* Summary Table */}
-            <div style={{ background: "var(--neutral-50)", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-md)", padding: "18px", fontSize: "0.875rem", display: "grid", gap: "10px", marginBottom: "20px" }}>
-              <div><strong>Authority:</strong> {selectedAuth.name} ({selectedAuth.ministry})</div>
-              <div><strong>Subject:</strong> {subject}</div>
-              <div><strong>Applicant:</strong> {applicantName} (+91 {mobile} · {email})</div>
-              <div><strong>Address:</strong> {address}, {state} - {pincode}</div>
-              <div><strong>Fee payable:</strong> {isBPL ? "₹0 (BPL Exemption claimed)" : "₹10 (Statutory Central Government RTI Fee)"}</div>
+            <div style={{ border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-sm)", padding: "16px", marginBottom: "20px", fontSize: "0.86rem", display: "grid", gap: "10px" }}>
+              <div>
+                <span style={{ color: "var(--neutral-500)", display: "block", fontSize: "0.76rem" }}>Public Authority:</span>
+                <strong>{selectedAuthority.name}</strong> ({selectedAuthority.ministry})
+              </div>
+              <div>
+                <span style={{ color: "var(--neutral-500)", display: "block", fontSize: "0.76rem" }}>Subject:</span>
+                <strong>{subject}</strong>
+              </div>
+              <div>
+                <span style={{ color: "var(--neutral-500)", display: "block", fontSize: "0.76rem" }}>Applicant:</span>
+                <div>{applicantName} · +91 {applicantMobile} · {applicantEmail}</div>
+                <div style={{ color: "var(--neutral-600)", fontSize: "0.8rem" }}>{applicantAddress}</div>
+              </div>
+              <div>
+                <span style={{ color: "var(--neutral-500)", display: "block", fontSize: "0.76rem" }}>Application Fee:</span>
+                <strong>{isBPL ? "₹0 (BPL Exemption Claimed)" : "₹10 (Statutory Fee)"}</strong>
+              </div>
             </div>
 
-            {/* Payment Mode Selection */}
+            {/* Fee Mode Selection (if not BPL) */}
             {!isBPL && (
-              <div className="form-group">
-                <label>Select payment mode (₹10)</label>
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
+              <div style={{ marginBottom: "24px" }}>
+                <label style={{ display: "block", fontSize: "0.86rem", fontWeight: 700, color: "var(--gov-navy-950)", marginBottom: "8px" }}>
+                  Select Payment Method (₹10)
+                </label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
                   {[
-                    { id: "UPI", label: "UPI (Google Pay, PhonePe, Paytm)" },
-                    { id: "DEBIT", label: "Debit / RuPay Card" },
-                    { id: "NET_BANKING", label: "Net Banking (SBI & All Banks)" }
-                  ].map((mode) => (
-                    <label
-                      key={mode.id}
+                    { id: "UPI", label: "UPI / QR Code" },
+                    { id: "DEBIT", label: "Debit Card / RuPay" },
+                    { id: "NETBANKING", label: "Net Banking" }
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.id as any)}
                       style={{
-                        flex: "1 1 180px",
-                        border: paymentMode === mode.id ? "2px solid var(--gov-navy-950)" : "1px solid var(--neutral-300)",
-                        borderRadius: "var(--radius-md)",
-                        padding: "10px 14px",
-                        cursor: "pointer",
-                        fontSize: "0.8125rem",
-                        fontWeight: paymentMode === mode.id ? 700 : 500,
-                        background: paymentMode === mode.id ? "var(--neutral-100)" : "#ffffff"
+                        padding: "10px",
+                        border: paymentMethod === m.id ? "2px solid var(--gov-navy-900)" : "1px solid var(--neutral-300)",
+                        background: paymentMethod === m.id ? "var(--neutral-100)" : "#ffffff",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        cursor: "pointer"
                       }}
                     >
-                      <input
-                        type="radio"
-                        name="payMode"
-                        checked={paymentMode === mode.id}
-                        onChange={() => setPaymentMode(mode.id as any)}
-                        style={{ marginRight: "8px" }}
-                      />
-                      {mode.label}
-                    </label>
+                      {m.label}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px" }}>
-              <button type="button" className="btn-secondary-action" onClick={handleBack} disabled={isSubmitting}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "28px", paddingTop: "16px", borderTop: "1px solid var(--neutral-200)" }}>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                style={{ background: "transparent", border: "1px solid var(--neutral-300)", padding: "8px 16px", borderRadius: "var(--radius-md)", fontSize: "0.84rem", fontWeight: 600, cursor: "pointer" }}
+              >
                 ← Back
               </button>
               <button
                 type="button"
-                className="btn-primary-action"
-                onClick={handleFinalSubmit}
+                className="btn-hero-primary"
+                onClick={handleSubmit}
                 disabled={isSubmitting}
-                style={{ padding: "12px 24px" }}
               >
-                {isSubmitting ? "Submitting application..." : isBPL ? "Submit application (₹0) →" : "Pay ₹10 & Submit →"}
+                {isSubmitting ? "Submitting application..." : isBPL ? "Submit Application (₹0) →" : "Pay ₹10 & Submit Application →"}
               </button>
             </div>
           </div>
@@ -545,11 +566,11 @@ function NewRTIWizardContent() {
   );
 }
 
-export default function NewRTIWizardPage() {
+export default function NewRtiPage() {
   return (
     <PortalPage>
-      <Suspense fallback={<div className="wrap" style={{ padding: "40px 0" }}>Loading form...</div>}>
-        <NewRTIWizardContent />
+      <Suspense fallback={<div className="wrap" style={{ padding: "40px 0" }}>Loading RTI filing wizard...</div>}>
+        <RequestWizard />
       </Suspense>
     </PortalPage>
   );
