@@ -3,6 +3,7 @@ import "./globals.css";
 import "./flows.css";
 import "./demo.css";
 import { AuthProvider } from "../lib/auth-context";
+import { LocationProvider } from "../lib/location-context";
 
 export const metadata: Metadata = {
   title: {
@@ -25,9 +26,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <LocationProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </LocationProvider>
       </body>
     </html>
   );
