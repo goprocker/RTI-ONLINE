@@ -21,7 +21,7 @@ export const primaryNavigation: readonly NavItem[] = [
       { href: "/faq", label: "Frequently Asked Questions", desc: "Common questions on RTI rules & fees" },
       { href: "/manual", label: "Citizen User Manual", desc: "Step-by-step statutory filing guidelines" },
       { href: "/reconciliation", label: "Payment Reconciliation", desc: "Check deducted payment status" },
-      { href: "/officer", label: "Officer & Admin Portal", desc: "Nodal Officer & CPIO processing desk" }
+      { href: "/officer", label: "Officer & Admin Portal", desc: "admin-rti.reeganlabs.com Nodal Officer & CPIO processing desk" }
     ]
   }
 ] as const;
