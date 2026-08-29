@@ -267,13 +267,13 @@ function StatusTrackingContent() {
           {/* Bottom Actions */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "32px", paddingTop: "20px", borderTop: "1px solid var(--neutral-200)", flexWrap: "wrap", gap: "12px" }}>
             <div style={{ display: "flex", gap: "10px" }}>
-              <button
-                type="button"
+              <Link
+                href={`/request/confirmation?regNo=${encodeURIComponent(activeApp.regNo)}`}
                 className="btn-secondary-action"
-                onClick={() => alert(`Official Filing Acknowledgement for ${activeApp.regNo} printed.`)}
+                style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none" }}
               >
-                🖨️ Print Acknowledgement
-              </button>
+                🖨️ View & Print Official Acknowledgement Receipt (PDF)
+              </Link>
             </div>
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
