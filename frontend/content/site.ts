@@ -6,61 +6,59 @@ export interface NavItem {
 }
 
 export const primaryNavigation: readonly NavItem[] = [
-  { href: "/request/eligibility", label: "File RTI" },
-  { href: "/status", label: "Track" },
-  { href: "/appeal", label: "First Appeal" },
-  { href: "/authorities", label: "Find Authority" },
+  { href: "/request/eligibility", label: "Submit Request" },
+  { href: "/status", label: "View Status" },
+  { href: "/appeal", label: "Submit First Appeal" },
+  { href: "/authorities", label: "Public Authorities" },
   {
     href: "/help",
-    label: "Help",
+    label: "Help & Guidelines",
     children: [
-      { href: "/manual", label: "How RTI works", desc: "Simple step-by-step guide to filing and timelines" },
-      { href: "/faq", label: "Frequently asked questions", desc: "Common questions about fees, eligibility, and rules" },
-      { href: "/search", label: "Search public information", desc: "Find published records before filing a new RTI" },
-      { href: "/offline", label: "Prepare offline application", desc: "Printable Section 6(1) letter for states without online portals" },
-      { href: "/reconciliation", label: "Payment issue", desc: "Check status if payment was deducted without an RTI number" }
+      { href: "/manual", label: "RTI Process & Flowchart", desc: "Statutory 30-day timeline and escalation decision tree" },
+      { href: "/faq", label: "Frequently Asked Questions", desc: "Common questions about fees, eligibility, and rules" },
+      { href: "/search", label: "Proactive Disclosures (Section 4)", desc: "Search published government records and circulars" },
+      { href: "/offline", label: "State & Offline Application Form", desc: "Printable Section 6(1) letter with Postal Order guidance" },
+      { href: "/reconciliation", label: "Payment Reconciliation", desc: "Check status if payment was deducted without an RTI number" }
     ]
   }
 ] as const;
 
 export const footerNavigation = [
-  { href: "/request/eligibility", label: "File an RTI" },
-  { href: "/status", label: "Track an application" },
-  { href: "/appeal", label: "File a First Appeal" },
-  { href: "/authorities", label: "Find a public authority" },
-  { href: "/search", label: "Search public disclosures" },
-  { href: "/offline", label: "Offline RTI application" },
-  { href: "/reconciliation", label: "Payment issue" },
-  { href: "/faq", label: "Frequently asked questions" },
-  { href: "/accessibility", label: "Accessibility statement" },
-  { href: "/privacy", label: "Privacy policy" },
-  { href: "/contact", label: "Contact and support" }
+  { href: "/request/eligibility", label: "Submit RTI Request" },
+  { href: "/status", label: "Track Application Status" },
+  { href: "/appeal", label: "Submit First Appeal" },
+  { href: "/authorities", label: "Public Authorities Directory" },
+  { href: "/search", label: "Proactive Disclosures (Section 4)" },
+  { href: "/offline", label: "Offline RTI Application Generator" },
+  { href: "/reconciliation", label: "Payment Verification" },
+  { href: "/faq", label: "Frequently Asked Questions" },
+  { href: "/accessibility", label: "Accessibility Statement" },
+  { href: "/privacy", label: "Privacy Policy & Terms" },
+  { href: "/contact", label: "Nodal Officer Contacts" }
 ] as const;
 
-export const prototypeNotice =
-  "RTI Online — Concept Redesign · An independent prototype demonstrating a citizen-first redesign of India's RTI Online experience. Not affiliated with or operated by the Government of India.";
-
-export const serviceNotice = prototypeNotice;
+export const serviceNotice =
+  "Official Right to Information (RTI) Online Portal of the Government of India for Central Ministries, Departments, and Public Authorities.";
 
 export const serviceSteps = [
   {
     number: "01",
-    title: "You file a request",
-    body: "Identify the public authority holding the records, write your questions, and submit with ₹10 (or ₹0 for BPL)."
+    title: "Submit Application",
+    body: "Identify the public authority holding the records, draft specific queries within 3,000 characters, and submit with statutory ₹10 fee (₹0 for BPL)."
   },
   {
     number: "02",
-    title: "Public Authority receives it",
-    body: "A unique registration number is generated instantly. The Nodal Officer assigns the file to the concerned CPIO."
+    title: "Nodal Scrutiny & Assignment",
+    body: "Unique Registration Number is generated immediately. The Nodal Officer assigns the file to the concerned CPIO or transfers under Section 6(3) in 5 days."
   },
   {
     number: "03",
-    title: "CPIO processes the records",
-    body: "The officer retrieves relevant files, notesheets, or decisions from government archives."
+    title: "CPIO Record Retrieval",
+    body: "The Central Public Information Officer retrieves government notesheets, circulars, and certified documents."
   },
   {
     number: "04",
-    title: "You receive a response",
-    body: "A digitally signed response is issued within 30 days. If unsatisfied, you can file a First Appeal at zero fee."
+    title: "Statutory Response Issued",
+    body: "A digitally signed response order is furnished within 30 days. If delayed or unsatisfied, submit a First Appeal under Section 19(1) at zero fee."
   }
 ] as const;

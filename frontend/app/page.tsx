@@ -4,6 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { PortalPage } from "../components/portal-shell";
 import { findMatchingAuthorities, SearchMatchResult } from "../lib/authorities-data";
+import { RtiFlowchart } from "../components/rti-flowchart";
+import { 
+  FileText, 
+  Search, 
+  Scale, 
+  Building2, 
+  ShieldAlert,
+  BookOpen
+} from "lucide-react";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,50 +30,90 @@ export default function Home() {
 
   return (
     <PortalPage>
-      {/* 01 — CITIZEN HERO */}
-      <section className="home-hero-section">
+      {/* 01 — AUTHENTIC SOVEREIGN HERO BANNER WITH GANDHI EMBLEM & TALISMAN */}
+      <section style={{ background: "linear-gradient(135deg, #071626 0%, #0f2942 60%, #1e3a8a 100%)", color: "#ffffff", padding: "26px 0 22px", borderBottom: "3px solid #d97706" }}>
         <div className="wrap">
-          <div className="home-hero-inner">
-            <h1 className="home-hero-title">
-              Get information from public authorities.
-            </h1>
-            <p className="home-hero-lead">
-              Request official government records, documents, notesheets, and decisions under the Right to Information Act, 2005.
-            </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "24px", alignItems: "center" }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245, 158, 11, 0.15)", border: "1px solid #f59e0b", padding: "2px 8px", borderRadius: "16px", fontSize: "0.72rem", fontWeight: 700, color: "#fef3c7", marginBottom: "10px" }}>
+                <span>🇮🇳</span>
+                <span>Government of India · RTI Act, 2005</span>
+              </div>
+              <h1 style={{ font: "800 2.05rem var(--font-serif)", color: "#ffffff", margin: "0 0 8px", lineHeight: 1.2 }}>
+                Right to Information Online Portal
+              </h1>
+              <p style={{ fontSize: "0.88rem", color: "#cbd5e1", lineHeight: 1.5, margin: "0 0 16px", maxWidth: "580px" }}>
+                Single-window platform for Indian citizens to file RTI applications, track disposal timelines, and submit First Appeals online to Central Ministries and Public Authorities.
+              </p>
 
-            <div className="home-hero-actions">
-              <Link href="/request/eligibility" className="btn-hero-primary">
-                File an RTI
-              </Link>
-              <Link href="/status" className="hero-secondary-link">
-                Already filed? Track your application →
-              </Link>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                <Link 
+                  href="/request/eligibility" 
+                  style={{ background: "#f59e0b", color: "#071626", border: 0, padding: "8px 18px", borderRadius: "6px", fontSize: "0.86rem", fontWeight: 800, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}
+                >
+                  <FileText size={15} />
+                  + Submit RTI Request
+                </Link>
+                <Link 
+                  href="/status" 
+                  style={{ background: "rgba(255, 255, 255, 0.1)", color: "#ffffff", border: "1px solid rgba(255, 255, 255, 0.25)", padding: "8px 16px", borderRadius: "6px", fontSize: "0.84rem", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  <Search size={14} />
+                  Track Application Status →
+                </Link>
+              </div>
+            </div>
+
+            {/* Commemorative Gandhi Emblem Card */}
+            <div style={{ background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "10px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" }}>
+              <div style={{ width: "80px", height: "80px", flexShrink: 0, position: "relative" }}>
+                <img 
+                  src="/images/gandhi-emblem.jpg" 
+                  alt="Mahatma Gandhi Commemorative Seal" 
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", border: "2px solid #f59e0b", boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }}
+                />
+              </div>
+              <div>
+                <blockquote style={{ margin: "0 0 4px", fontSize: "0.76rem", fontStyle: "italic", color: "#e2e8f0", lineHeight: 1.45 }}>
+                  &ldquo;Recall the face of the poorest and the weakest person... and ask yourself if the step you contemplate is going to be of any use to him.&rdquo;
+                </blockquote>
+                <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#f59e0b" }}>
+                  — Mahatma Gandhi
+                </div>
+                <div style={{ fontSize: "0.66rem", color: "#94a3b8" }}>
+                  Father of the Nation · Transparency & Citizen Empowerment
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 02 — STAR INNOVATION: NATURAL LANGUAGE AUTHORITY FINDER */}
-      <section className="authority-finder-section">
+      {/* 02 — COMPACT AUTHORITY FINDER SEARCH BAR */}
+      <section style={{ padding: "16px 0", background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
         <div className="wrap">
-          <div className="finder-box">
-            <div className="finder-header">
-              <h2 className="finder-title">
-                Not sure where to send your RTI?
-              </h2>
-              <p className="finder-subtitle">
-                Describe the information you need in plain language. We&apos;ll help you find the responsible ministry or department.
-              </p>
+          <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "12px 18px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
+              <div>
+                <strong style={{ fontSize: "0.9rem", color: "#071626" }}>
+                  Find the Concerned Public Authority:
+                </strong>
+                <span style={{ fontSize: "0.78rem", color: "#64748b", marginLeft: "6px" }}>
+                  Search by keywords (e.g. Passport dispatch, EPFO pension claim, CBSE copy verification...)
+                </span>
+              </div>
+              <Link href="/authorities" style={{ fontSize: "0.78rem", fontWeight: 700, color: "#0f2942", textDecoration: "none" }}>
+                Browse All Authorities Directory →
+              </Link>
             </div>
 
-            <div className="finder-input-row">
+            <div style={{ display: "flex", gap: "8px" }}>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="e.g. Why is my passport application still pending, or EPFO claim status..."
-                className="finder-input"
-                aria-label="Describe what information you need"
+                placeholder="Type keywords (e.g. Passport, Income Tax, EPFO, Railway, UGC, AIIMS...)"
+                style={{ flex: 1, padding: "7px 12px", border: "1.5px solid #cbd5e1", borderRadius: "6px", fontSize: "0.86rem" }}
               />
               <Link
                 href={
@@ -72,190 +121,201 @@ export default function Home() {
                     ? `/request/new?authority=${encodeURIComponent(matchedAuthority.authority.id)}`
                     : `/authorities?q=${encodeURIComponent(searchQuery)}`
                 }
-                className="btn-finder-search"
+                style={{ background: "#0f2942", color: "#ffffff", border: 0, padding: "7px 16px", borderRadius: "6px", fontSize: "0.82rem", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
               >
-                Find the right authority
+                <Search size={14} />
+                Search
               </Link>
             </div>
 
-            {/* Matched Authority Result Card */}
             {matchedAuthority && (
-              <div className="finder-match-card">
-                <div className="finder-match-top">
-                  <div>
-                    <span className="match-pill">Likely match</span>
-                    <h3 className="match-authority-name">{matchedAuthority.authority.name}</h3>
-                    <div className="match-ministry-name">{matchedAuthority.authority.ministry}</div>
+              <div style={{ marginTop: "10px", background: "#ffffff", border: "1px solid #93c5fd", borderRadius: "6px", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                <div>
+                  <span style={{ background: "#e0f2fe", color: "#0369a1", fontSize: "0.68rem", fontWeight: 800, padding: "1px 6px", borderRadius: "4px" }}>
+                    MATCHED PUBLIC AUTHORITY
+                  </span>
+                  <div style={{ fontWeight: 800, fontSize: "0.9rem", color: "#071626", marginTop: "2px" }}>
+                    {matchedAuthority.authority.name}
                   </div>
-                  <Link
-                    href={`/request/new?authority=${encodeURIComponent(matchedAuthority.authority.id)}`}
-                    className="btn-use-authority"
-                  >
-                    Use this authority →
-                  </Link>
+                  <div style={{ fontSize: "0.76rem", color: "#64748b" }}>
+                    {matchedAuthority.authority.ministry} · {matchedAuthority.authority.nodalOfficerDesc}
+                  </div>
                 </div>
-
-                <div className="match-reason-box">
-                  <strong>Why this match? </strong>
-                  {matchedAuthority.authority.nodalOfficerDesc}
-                </div>
-
-                <div className="match-footer-links">
-                  <span>Common topics: {matchedAuthority.authority.commonTopics?.join(" · ") || matchedAuthority.authority.keywords.slice(0, 4).join(" · ")}</span>
-                  <Link href={`/authorities?q=${encodeURIComponent(searchQuery)}`} className="match-other-link">
-                    View other matches →
-                  </Link>
-                </div>
+                <Link
+                  href={`/request/new?authority=${encodeURIComponent(matchedAuthority.authority.id)}`}
+                  style={{ background: "#0f2942", color: "#ffffff", padding: "5px 12px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 700, textDecoration: "none" }}
+                >
+                  File with this Authority →
+                </Link>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* 03 — WHAT ARE YOU TRYING TO DO? (INTENT ROUTER) */}
-      <section className="intent-router-section">
+      {/* 03 — SLEEK HORIZONTAL LINEAR TIMELINE (1 ── 2 ── 3 ── 4) */}
+      <section style={{ padding: "18px 0 16px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
         <div className="wrap">
-          <div className="section-heading-center">
-            <h2 className="section-title">What are you trying to do?</h2>
-            <p className="section-subtitle">Choose the service that matches your requirement</p>
-          </div>
-
-          <div className="intent-grid">
-            {/* 1. Request Records */}
-            <Link href="/request/eligibility" className="intent-card">
-              <div className="intent-card-header">
-                <span className="intent-number">01</span>
-                <h3 className="intent-card-title">I need government information</h3>
-              </div>
-              <p className="intent-card-body">
-                Request certified copies of files, circulars, exam answer scripts, or official status records.
-              </p>
-              <span className="intent-card-action">File an RTI request →</span>
-            </Link>
-
-            {/* 2. Service Complaint */}
-            <div className="intent-card intent-card-alt">
-              <div className="intent-card-header">
-                <span className="intent-number">02</span>
-                <h3 className="intent-card-title">My service has a problem</h3>
-              </div>
-              <p className="intent-card-body">
-                RTI provides records, not service resolution. For complaints or service delays, lodge on CPGRAMS.
-              </p>
-              <a
-                href="https://pgportal.gov.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="intent-card-action external-action"
-              >
-                File a grievance on CPGRAMS ↗
-              </a>
+          <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "16px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <strong style={{ fontSize: "0.88rem", color: "#071626" }}>
+                4-Step RTI Application & Disposal Process
+              </strong>
+              <span style={{ fontSize: "0.74rem", color: "#64748b" }}>
+                Standard 30-Day Disposal Pipeline under RTI Act 2005
+              </span>
             </div>
 
-            {/* 3. Awaiting Response / Appeal */}
-            <Link href="/appeal" className="intent-card">
-              <div className="intent-card-header">
-                <span className="intent-number">03</span>
-                <h3 className="intent-card-title">I haven&apos;t received a response</h3>
+            {/* Connected Horizontal Flow Pipeline */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", gap: "8px", alignItems: "center" }}>
+              
+              {/* Step 1 */}
+              <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "10px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                  <span style={{ background: "#0f2942", color: "#ffffff", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.68rem", fontWeight: 800 }}>1</span>
+                  <strong style={{ fontSize: "0.8rem", color: "#071626" }}>Submit Request</strong>
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "#64748b" }}>Section 6(1) · ₹10 Fee</div>
               </div>
-              <p className="intent-card-body">
-                If your RTI response is delayed beyond 30 days or incomplete, appeal under Section 19(1) at zero fee.
-              </p>
-              <span className="intent-card-action">File a First Appeal →</span>
-            </Link>
 
-            {/* 4. Don't Know Department */}
-            <Link href="/authorities" className="intent-card">
-              <div className="intent-card-header">
-                <span className="intent-number">04</span>
-                <h3 className="intent-card-title">I don&apos;t know which department</h3>
+              <div style={{ color: "#94a3b8" }}>➔</div>
+
+              {/* Step 2 */}
+              <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "10px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                  <span style={{ background: "#0f2942", color: "#ffffff", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.68rem", fontWeight: 800 }}>2</span>
+                  <strong style={{ fontSize: "0.8rem", color: "#071626" }}>Nodal Assignment</strong>
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "#64748b" }}>Nodal / 5-day Sec 6(3) Transfer</div>
               </div>
-              <p className="intent-card-body">
-                Browse our directory of Central Public Authorities or search by administrative topic.
-              </p>
-              <span className="intent-card-action">Browse public authorities →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* 04 — HOW RTI WORKS (QUIET 4-STEP VERTICAL PROGRESSION) */}
-      <section className="how-it-works-section">
-        <div className="wrap">
-          <div className="section-heading-center">
-            <h2 className="section-title">How RTI works</h2>
-            <p className="section-subtitle">A straightforward, time-bound legal process for every citizen</p>
-          </div>
+              <div style={{ color: "#94a3b8" }}>➔</div>
 
-          <div className="steps-flow-grid">
-            <div className="step-flow-item">
-              <div className="step-number-badge">1</div>
-              <h3 className="step-flow-title">You file a request</h3>
-              <p className="step-flow-text">
-                Identify the public authority, write your questions, and pay the ₹10 fee (₹0 for BPL).
-              </p>
-            </div>
+              {/* Step 3 */}
+              <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "10px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                  <span style={{ background: "#0f2942", color: "#ffffff", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.68rem", fontWeight: 800 }}>3</span>
+                  <strong style={{ fontSize: "0.8rem", color: "#071626" }}>CPIO Retrieval</strong>
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "#64748b" }}>CPIO Retrieval / Record Notice</div>
+              </div>
 
-            <div className="step-flow-item">
-              <div className="step-number-badge">2</div>
-              <h3 className="step-flow-title">Authority receives it</h3>
-              <p className="step-flow-text">
-                Registration number is issued immediately and routed to the concerned Public Information Officer.
-              </p>
-            </div>
+              <div style={{ color: "#94a3b8" }}>➔</div>
 
-            <div className="step-flow-item">
-              <div className="step-number-badge">3</div>
-              <h3 className="step-flow-title">CPIO processes records</h3>
-              <p className="step-flow-text">
-                The officer retrieves official files and prepares a certified statutory disclosure.
-              </p>
-            </div>
-
-            <div className="step-flow-item">
-              <div className="step-number-badge">4</div>
-              <h3 className="step-flow-title">You receive a response</h3>
-              <p className="step-flow-text">
-                A signed reply is issued within 30 days. You can file a free First Appeal if unsatisfied.
-              </p>
+              {/* Step 4 */}
+              <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "10px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                  <span style={{ background: "#16a34a", color: "#ffffff", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.68rem", fontWeight: 800 }}>4</span>
+                  <strong style={{ fontSize: "0.8rem", color: "#071626" }}>Statutory Disposal</strong>
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "#64748b" }}>30-Day Order / ₹0 First Appeal</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 05 — SECONDARY CITIZEN SERVICES STRIP */}
-      <section className="secondary-services-section">
+      {/* 04 — DETAILED STATUTORY FLOWCHART CARD (COMPACT VIEWER + FULLSCREEN LIGHTBOX) */}
+      <section style={{ padding: "20px 0 24px", background: "#ffffff" }}>
         <div className="wrap">
-          <div className="secondary-services-grid">
-            <div className="secondary-service-item">
-              <h3 className="secondary-item-title">Search existing disclosures</h3>
-              <p className="secondary-item-desc">
-                Many answers are already published in official citizen charters and circulars.
-              </p>
-              <Link href="/search" className="secondary-item-link">
-                Search published records →
-              </Link>
-            </div>
+          <RtiFlowchart />
+        </div>
+      </section>
 
-            <div className="secondary-service-item">
-              <h3 className="secondary-item-title">Prepare an offline application</h3>
-              <p className="secondary-item-desc">
-                For states or local bodies without online portals, generate a formal printable letter.
-              </p>
-              <Link href="/offline" className="secondary-item-link">
-                Offline RTI generator →
-              </Link>
-            </div>
+      {/* 05 — ONLINE CITIZEN SERVICES CARDS */}
+      <section style={{ padding: "20px 0 32px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
+        <div className="wrap">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+            
+            {/* 1. Request */}
+            <Link 
+              href="/request/eligibility" 
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "14px", textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#d97706", fontWeight: 800, fontSize: "0.72rem", marginBottom: "4px" }}>
+                  <FileText size={13} />
+                  <span>SECTION 6(1)</span>
+                </div>
+                <h3 style={{ fontSize: "0.9rem", fontWeight: 800, color: "#071626", margin: "0 0 3px" }}>
+                  Submit RTI Request
+                </h3>
+                <p style={{ fontSize: "0.76rem", color: "#64748b", lineHeight: 1.4, margin: 0 }}>
+                  Request certified copies of files, circulars, or evaluation books.
+                </p>
+              </div>
+              <span style={{ fontSize: "0.76rem", fontWeight: 800, color: "#0f2942", marginTop: "10px" }}>
+                Submit Request →
+              </span>
+            </Link>
 
-            <div className="secondary-service-item">
-              <h3 className="secondary-item-title">Payment deducted without RTI number?</h3>
-              <p className="secondary-item-desc">
-                Verify banking settlement and retrieve pending registration reference.
-              </p>
-              <Link href="/reconciliation" className="secondary-item-link">
-                Check payment status →
-              </Link>
-            </div>
+            {/* 2. Grievance */}
+            <a 
+              href="https://pgportal.gov.in" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "14px", textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#dc2626", fontWeight: 800, fontSize: "0.72rem", marginBottom: "4px" }}>
+                  <ShieldAlert size={13} />
+                  <span>CPGRAMS PORTAL</span>
+                </div>
+                <h3 style={{ fontSize: "0.9rem", fontWeight: 800, color: "#071626", margin: "0 0 3px" }}>
+                  Lodge Grievance
+                </h3>
+                <p style={{ fontSize: "0.76rem", color: "#64748b", lineHeight: 1.4, margin: 0 }}>
+                  For personal service complaints, lodge on the national grievance portal.
+                </p>
+              </div>
+              <span style={{ fontSize: "0.76rem", fontWeight: 800, color: "#dc2626", marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                Go to CPGRAMS ↗
+              </span>
+            </a>
+
+            {/* 3. First Appeal */}
+            <Link 
+              href="/appeal" 
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "14px", textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#0284c7", fontWeight: 800, fontSize: "0.72rem", marginBottom: "4px" }}>
+                  <Scale size={13} />
+                  <span>SECTION 19(1)</span>
+                </div>
+                <h3 style={{ fontSize: "0.9rem", fontWeight: 800, color: "#071626", margin: "0 0 3px" }}>
+                  Submit First Appeal
+                </h3>
+                <p style={{ fontSize: "0.76rem", color: "#64748b", lineHeight: 1.4, margin: 0 }}>
+                  If response was delayed beyond 30 days or incomplete, appeal at ₹0 fee.
+                </p>
+              </div>
+              <span style={{ fontSize: "0.76rem", fontWeight: 800, color: "#0f2942", marginTop: "10px" }}>
+                Submit First Appeal →
+              </span>
+            </Link>
+
+            {/* 4. Proactive Disclosures */}
+            <Link 
+              href="/search" 
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "14px", textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#16a34a", fontWeight: 800, fontSize: "0.72rem", marginBottom: "4px" }}>
+                  <BookOpen size={13} />
+                  <span>SECTION 4(1)(b)</span>
+                </div>
+                <h3 style={{ fontSize: "0.9rem", fontWeight: 800, color: "#071626", margin: "0 0 3px" }}>
+                  Public Disclosures
+                </h3>
+                <p style={{ fontSize: "0.76rem", color: "#64748b", lineHeight: 1.4, margin: 0 }}>
+                  Search proactive government circulars, annual reports, and charters.
+                </p>
+              </div>
+              <span style={{ fontSize: "0.76rem", fontWeight: 800, color: "#0f2942", marginTop: "10px" }}>
+                Search Disclosures →
+              </span>
+            </Link>
           </div>
         </div>
       </section>
